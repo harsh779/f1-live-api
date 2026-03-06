@@ -56,13 +56,14 @@ function buildTimingView() {
         best_lap_time:           bestLap,
 
         sectors: [0, 1, 2].map(i => {
-          const s  = td.Sectors?.[i]        || {};
-          const bs = stat.BestSectors?.[i]  || {};
+          const s  = td.Sectors?.[i]       || {};
+          const bs = stat.BestSectors?.[i] || {};
+          const usingFallback = !s.Value && !!bs.Value;
           return {
-            value:         s.Value    || bs.Value || null,
-            personal_best: s.PersonalFastest || (!!bs.Value && !s.Value) || false,
-            overall_best:  s.OverallFastest  || false,
-            stopped:       s.Stopped         || false,
+            value:         s.Value || bs.Value || null,
+            personal_best: usingFallback ? false : (s.PersonalFastest || false),
+            overall_best:  usingFallback ? bs.Position === 1 : (s.OverallFastest || false),
+            stopped:       s.Stopped || false,
           };
         }),
 
