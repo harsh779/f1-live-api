@@ -4,94 +4,59 @@ const express = require('express');
 const cors    = require('cors');
 const morgan  = require('morgan');
 
-const errorHandler = require('./middleware/errorHandler');
-
-const sessionsRouter    = require('./routes/sessions');
-const meetingsRouter    = require('./routes/meetings');
-const driversRouter     = require('./routes/drivers');
-const carDataRouter     = require('./routes/carData');
-const positionRouter    = require('./routes/position');
-const intervalsRouter   = require('./routes/intervals');
-const lapsRouter        = require('./routes/laps');
-const stintsRouter      = require('./routes/stints');
-const pitRouter         = require('./routes/pit');
-const locationRouter    = require('./routes/location');
-const weatherRouter     = require('./routes/weather');
-const raceControlRouter = require('./routes/raceControl');
-const teamRadioRouter   = require('./routes/teamRadio');
-const liveRouter        = require('./routes/live');
-const timingRouter      = require('./routes/timing');
+const f1client = require('./f1timing/client');
+const apiRouter = require('./routes/api');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── Middleware ─────────────────────────────────────────────────────────────
+// ── Start direct F1 live timing WebSocket ─────────────────────────────────────
+f1client.start();
+
+// ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 
-// ── Routes ─────────────────────────────────────────────────────────────────
-app.use('/sessions',     sessionsRouter);
-app.use('/meetings',     meetingsRouter);
-app.use('/drivers',      driversRouter);
-app.use('/car-data',     carDataRouter);
-app.use('/position',     positionRouter);
-app.use('/intervals',    intervalsRouter);
-app.use('/laps',         lapsRouter);
-app.use('/stints',       stintsRouter);
-app.use('/pit',          pitRouter);
-app.use('/location',     locationRouter);
-app.use('/weather',      weatherRouter);
-app.use('/race-control', raceControlRouter);
-app.use('/team-radio',   teamRadioRouter);
-app.use('/live',         liveRouter);
-app.use('/timing',       timingRouter);
+// ── Routes ────────────────────────────────────────────────────────────────────
+app.use('/', apiRouter);
 
-// ── Root ───────────────────────────────────────────────────────────────────
+// ── Root ──────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({
-    name: 'F1 Live Data API',
-    description: 'Proxies and aggregates OpenF1 real-time Formula 1 data',
-    upstream: 'https://openf1.org',
+    name: 'F1 Live Timing API',
+    description: 'Direct connection to F1 live timing feed — no third-party APIs',
+    source: 'livetiming.formula1.com (SignalR WebSocket)',
     endpoints: {
-      sessions:     '/sessions',
-      meetings:     '/meetings',
-      drivers:      '/drivers',
-      car_data:     '/car-data',
-      position:     '/position',
-      intervals:    '/intervals',
-      laps:         '/laps',
-      stints:       '/stints',
-      pit_stops:    '/pit',
-      location:     '/location',
-      weather:      '/weather',
-      race_control: '/race-control',
-      team_radio:   '/team-radio',
-      live_snapshot: '/live/snapshot',
-      live_stream:   '/live/stream  (SSE)',
-      timing_sheet:  '/timing/latest',
-      timing_stream: '/timing/stream  (SSE)',
-    },
-    tips: {
-      latest:  'Append /latest to most routes for the current live session',
-      filter:  'Pass any field as a query parameter to filter results',
-      compare: 'OpenF1 supports comparison operators, e.g. ?speed>=300',
+      status:          'GET /status',
+      drivers:         'GET /drivers',
+      timing:          'GET /timing',
+      timing_driver:   'GET /timing/:number',
+      weather:         'GET /weather',
+      track:           'GET /track',
+      race_control:    'GET /race-control',
+      car_telemetry:   'GET /car/:number',
+      snapshot:        'GET /snapshot',
+      stream_raw:      'GET /stream           (SSE — every raw update)',
+      stream_filtered: 'GET /stream?topic=X   (SSE — one topic)',
+      stream_timing:   'GET /stream/timing    (SSE — full leaderboard)',
     },
   });
 });
 
-// ── 404 ───────────────────────────────────────────────────────────────────
+// ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
+  res.status(404).json({ error: `${req.method} ${req.path} not found` });
 });
 
-// ── Error handler ─────────────────────────────────────────────────────────
-app.use(errorHandler);
+// ── Error handler ─────────────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+});
 
-// ── Start ─────────────────────────────────────────────────────────────────
+// ── Start ─────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`F1 Live Data API running on http://localhost:${PORT}`);
-  console.log(`Upstream: ${process.env.OPENF1_BASE_URL}`);
+  console.log(`F1 Live Timing API running on http://localhost:${PORT}`);
 });
 
 module.exports = app;
