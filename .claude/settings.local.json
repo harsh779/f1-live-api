@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install express axios node-cache dotenv cors morgan)",
+      "Bash(curl -s \"http://localhost:3000/sessions/latest\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''';process.stdin.on\\(''data'',c=>d+=c\\);process.stdin.on\\(''end'',\\(\\)=>{try{const j=JSON.parse\\(d\\);console.log\\(JSON.stringify\\(j,null,2\\)\\)}catch{console.log\\(d\\)}}\\)\")",
+      "Bash(curl -s \"http://localhost:3000/weather/latest\")",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''';process.stdin.on\\(''data'',c=>d+=c\\);process.stdin.on\\(''end'',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\).slice\\(-3\\),null,2\\)\\)\\)\")"
+    ]
+  }
+}

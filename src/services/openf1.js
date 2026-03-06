@@ -36,7 +36,17 @@ async function fetch(endpoint, params = {}, isStatic = false) {
   const cached = cache.get(url);
   if (cached !== undefined) return cached;
 
-  const response = await client.get(url);
+  let response;
+  try {
+    response = await client.get(url);
+  } catch (err) {
+    // Treat 404 as empty — some endpoints return 404 for inactive sessions
+    if (err.response?.status === 404) {
+      cache.set(url, []);
+      return [];
+    }
+    throw err;
+  }
   cache.set(url, response.data);
   return response.data;
 }

@@ -20,6 +20,7 @@ const weatherRouter     = require('./routes/weather');
 const raceControlRouter = require('./routes/raceControl');
 const teamRadioRouter   = require('./routes/teamRadio');
 const liveRouter        = require('./routes/live');
+const timingRouter      = require('./routes/timing');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use('/weather',      weatherRouter);
 app.use('/race-control', raceControlRouter);
 app.use('/team-radio',   teamRadioRouter);
 app.use('/live',         liveRouter);
+app.use('/timing',       timingRouter);
 
 // ── Root ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
@@ -67,6 +69,8 @@ app.get('/', (req, res) => {
       team_radio:   '/team-radio',
       live_snapshot: '/live/snapshot',
       live_stream:   '/live/stream  (SSE)',
+      timing_sheet:  '/timing/latest',
+      timing_stream: '/timing/stream  (SSE)',
     },
     tips: {
       latest:  'Append /latest to most routes for the current live session',
