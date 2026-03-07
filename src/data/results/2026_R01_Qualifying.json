@@ -1,0 +1,1035 @@
+{
+  "meta": {
+    "year": "2026",
+    "round": 1,
+    "meeting": "Australian Grand Prix",
+    "circuit": "Melbourne",
+    "session_name": "Qualifying",
+    "session_type": "Qualifying",
+    "date": "2026-03-07T16:00:00",
+    "total_laps": null
+  },
+  "weather": {
+    "AirTemp": "20.4",
+    "Humidity": "59.1",
+    "Pressure": "1013.7",
+    "Rainfall": "0",
+    "TrackTemp": "31.4",
+    "WindDirection": "126",
+    "WindSpeed": "1.5",
+    "_kf": true
+  },
+  "fastest_lap": null,
+  "results": [
+    {
+      "position": 1,
+      "driver_number": "63",
+      "laps_completed": 22,
+      "gap_to_leader": null,
+      "best_lap_time": "1:18.518",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 8
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 1
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "228",
+        "i2": "218",
+        "fl": null,
+        "st": "236"
+      }
+    },
+    {
+      "position": 2,
+      "driver_number": "12",
+      "laps_completed": 18,
+      "gap_to_leader": null,
+      "best_lap_time": "1:18.811",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 1
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "238",
+        "i2": "251",
+        "fl": null,
+        "st": "252"
+      }
+    },
+    {
+      "position": 3,
+      "driver_number": "6",
+      "laps_completed": 19,
+      "gap_to_leader": null,
+      "best_lap_time": "1:19.303",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": null
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "213",
+        "i2": "227",
+        "fl": null,
+        "st": "262"
+      }
+    },
+    {
+      "position": 4,
+      "driver_number": "16",
+      "laps_completed": 24,
+      "gap_to_leader": null,
+      "best_lap_time": "1:19.327",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": true,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "false",
+          "laps": 7
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "208",
+        "i2": "207",
+        "fl": null,
+        "st": "250"
+      }
+    },
+    {
+      "position": 5,
+      "driver_number": "81",
+      "laps_completed": 26,
+      "gap_to_leader": null,
+      "best_lap_time": "1:19.380",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": true,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 10
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "199",
+        "i2": "212",
+        "fl": null,
+        "st": "229"
+      }
+    },
+    {
+      "position": 6,
+      "driver_number": "1",
+      "laps_completed": 26,
+      "gap_to_leader": null,
+      "best_lap_time": "1:19.475",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": true,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 11
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 7
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "224",
+        "i2": "235",
+        "fl": null,
+        "st": "241"
+      }
+    },
+    {
+      "position": 7,
+      "driver_number": "44",
+      "laps_completed": 25,
+      "gap_to_leader": null,
+      "best_lap_time": "1:19.478",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": true,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "false",
+          "laps": 9
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": "193",
+        "i2": "198",
+        "fl": null,
+        "st": "232"
+      }
+    },
+    {
+      "position": 8,
+      "driver_number": "30",
+      "laps_completed": 24,
+      "gap_to_leader": null,
+      "best_lap_time": "1:19.994",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": "168",
+        "i2": "224",
+        "fl": null,
+        "st": "295"
+      }
+    },
+    {
+      "position": 9,
+      "driver_number": "41",
+      "laps_completed": 25,
+      "gap_to_leader": null,
+      "best_lap_time": "1:21.247",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": "229",
+        "i2": "233",
+        "fl": null,
+        "st": "235"
+      }
+    },
+    {
+      "position": 10,
+      "driver_number": "5",
+      "laps_completed": 14,
+      "gap_to_leader": null,
+      "best_lap_time": null,
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "253"
+      }
+    },
+    {
+      "position": 11,
+      "driver_number": "27",
+      "laps_completed": 18,
+      "gap_to_leader": null,
+      "best_lap_time": "1:20.303",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": null,
+          "new": false,
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 7
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "193"
+      }
+    },
+    {
+      "position": 12,
+      "driver_number": "87",
+      "laps_completed": 18,
+      "gap_to_leader": null,
+      "best_lap_time": "1:20.311",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "252"
+      }
+    },
+    {
+      "position": 13,
+      "driver_number": "31",
+      "laps_completed": 18,
+      "gap_to_leader": null,
+      "best_lap_time": "1:20.491",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "250"
+      }
+    },
+    {
+      "position": 14,
+      "driver_number": "10",
+      "laps_completed": 18,
+      "gap_to_leader": null,
+      "best_lap_time": "1:20.501",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "238"
+      }
+    },
+    {
+      "position": 15,
+      "driver_number": "23",
+      "laps_completed": 19,
+      "gap_to_leader": null,
+      "best_lap_time": "1:20.941",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 1
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 8
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 1
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "282"
+      }
+    },
+    {
+      "position": 16,
+      "driver_number": "43",
+      "laps_completed": 18,
+      "gap_to_leader": null,
+      "best_lap_time": "1:21.270",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "244"
+      }
+    },
+    {
+      "position": 17,
+      "driver_number": "14",
+      "laps_completed": 10,
+      "gap_to_leader": null,
+      "best_lap_time": "1:21.969",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 5
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 4
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "98"
+      }
+    },
+    {
+      "position": 18,
+      "driver_number": "11",
+      "laps_completed": 7,
+      "gap_to_leader": null,
+      "best_lap_time": "1:22.605",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 1
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "235"
+      }
+    },
+    {
+      "position": 19,
+      "driver_number": "77",
+      "laps_completed": 8,
+      "gap_to_leader": null,
+      "best_lap_time": "1:23.244",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 3
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 2
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "254"
+      }
+    },
+    {
+      "position": 20,
+      "driver_number": "3",
+      "laps_completed": 2,
+      "gap_to_leader": null,
+      "best_lap_time": null,
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 1
+        }
+      ],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": "305"
+      }
+    },
+    {
+      "position": 21,
+      "driver_number": "55",
+      "laps_completed": 1,
+      "gap_to_leader": null,
+      "best_lap_time": null,
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": null
+      }
+    },
+    {
+      "position": 22,
+      "driver_number": "18",
+      "laps_completed": null,
+      "gap_to_leader": null,
+      "best_lap_time": null,
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": true,
+      "stints": [],
+      "speed_traps": {
+        "i1": null,
+        "i2": null,
+        "fl": null,
+        "st": null
+      }
+    }
+  ]
+}

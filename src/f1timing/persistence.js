@@ -1,8 +1,9 @@
 const fs   = require('fs');
 const path = require('path');
 
-const RESULTS_DIR  = path.join(__dirname, '../data/results');
-const LAST_STATE_FILE = path.join(__dirname, '../data/last_state.json');
+const DATA_DIR        = process.env.DATA_DIR || path.join(__dirname, '../data');
+const RESULTS_DIR     = path.join(DATA_DIR, 'results');
+const LAST_STATE_FILE = path.join(DATA_DIR, 'last_state.json');
 
 // Ensure results directory exists
 if (!fs.existsSync(RESULTS_DIR)) fs.mkdirSync(RESULTS_DIR, { recursive: true });
