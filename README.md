@@ -218,3 +218,9 @@ During an active F1 session the WebSocket connects automatically. Outside of ses
 | Race control messages | As issued |
 | Standings | After each finalised race / sprint |
 | Calendar | Static (2026 season) |
+
+---
+
+## Author
+
+**harsh779**
