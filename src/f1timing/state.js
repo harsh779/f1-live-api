@@ -27,6 +27,7 @@ class F1State extends EventEmitter {
     this.lapCount          = {};
     this.extrapolatedClock = {};
     this.topThree          = {};
+    this.teamRadio         = { Captures: [] };
     this.heartbeat         = {};
     this._lastUpdate       = null;
     this._sessionSaved     = false;
@@ -48,6 +49,7 @@ class F1State extends EventEmitter {
     this.lapCount          = saved.lap_count     || {};
     this.extrapolatedClock = saved.clock         || {};
     this.topThree          = saved.top_three     || {};
+    this.teamRadio         = saved.team_radio    || { Captures: [] };
     this._lastUpdate       = saved.last_update   || null;
     console.log('[F1] Restored persisted state from disk');
   }
@@ -84,6 +86,18 @@ class F1State extends EventEmitter {
       case 'ExtrapolatedClock': this.extrapolatedClock = deepMerge(this.extrapolatedClock, data); break;
       case 'TopThree':          this.topThree          = deepMerge(this.topThree, data); break;
       case 'Heartbeat':         this.heartbeat         = data; break;
+      case 'TeamRadio':
+        if (data?.Captures) {
+          const existing = this.teamRadio.Captures || [];
+          const patch    = data.Captures;
+          if (Array.isArray(patch)) {
+            this.teamRadio.Captures = [...existing, ...patch];
+          } else {
+            Object.values(patch).forEach(cap => existing.push(cap));
+            this.teamRadio.Captures = existing;
+          }
+        }
+        break;
       case 'RaceControlMessages':
         if (data?.Messages) {
           const existing = this.raceControl.Messages || [];
@@ -143,6 +157,7 @@ class F1State extends EventEmitter {
       weather:      this.weatherData,
       track_status: this.trackStatus,
       race_control: this.raceControl,
+      team_radio:   this.teamRadio,
       lap_count:    this.lapCount,
       clock:        this.extrapolatedClock,
       top_three:    this.topThree,

@@ -11,6 +11,8 @@ const resultsRouter   = require('./routes/results');
 const standingsRouter = require('./routes/standings');
 const telemetryRouter = require('./routes/telemetry');
 const pitsRouter      = require('./routes/pits');
+const teamRadioRouter = require('./routes/teamRadio');
+const historyRouter   = require('./routes/history');
 
 const { globalLimiter, sseLimiter } = require('./middleware/rateLimiter');
 const apiKeyAuth                    = require('./middleware/apiKey');
@@ -34,14 +36,17 @@ app.use(csvFormat);
 app.get('/', (_req, res) => {
   res.json({
     name: 'F1 Live Timing API',
-    version: '2.0.0',
+    version: '3.0.0',
     description: 'Direct connection to F1 live timing feed — no third-party APIs',
     source: 'livetiming.formula1.com (SignalR WebSocket)',
     features: {
-      live_streaming: 'SSE at ~3.7Hz, real-time push from SignalR WebSocket',
-      csv_export:     'Add ?format=csv to any endpoint for CSV output',
-      rate_limiting:  '100 req/min per IP (RateLimit-* headers)',
-      authentication: 'API key via x-api-key header or ?api_key= (optional when unconfigured)',
+      live_streaming:  'SSE at ~3.7Hz, real-time push from SignalR WebSocket',
+      mini_sectors:    'Segment-level timing in /timing — colored blocks like F1 TV',
+      team_radio:      'Audio URLs for team radio messages at /team-radio',
+      historical_data: 'Full F1 archive access at /history (all seasons)',
+      csv_export:      'Add ?format=csv to any endpoint for CSV output',
+      rate_limiting:   '100 req/min per IP (RateLimit-* headers)',
+      authentication:  'API key via x-api-key header or ?api_key= (optional when unconfigured)',
     },
     endpoints: {
       status:            'GET /status',
@@ -71,6 +76,11 @@ app.get('/', (_req, res) => {
       telemetry_driver:  'GET /telemetry/:number',
       telemetry_stream:  'GET /telemetry/stream/all   (SSE ~3.7Hz)',
       telemetry_stream1: 'GET /telemetry/stream/:number (SSE ~3.7Hz)',
+      team_radio:        'GET /team-radio',
+      team_radio_driver: 'GET /team-radio/:number',
+      history:           'GET /history',
+      history_year:      'GET /history/:year',
+      history_session:   'GET /history/session?path=...&topic=TimingData',
       docs:              'GET /docs',
     },
   });
@@ -80,7 +90,7 @@ app.get('/', (_req, res) => {
 app.get('/docs', (_req, res) => {
   res.json({
     title: 'F1 Live Timing API Documentation',
-    version: '2.0.0',
+    version: '3.0.0',
     base_url: `${_req.protocol}://${_req.get('host')}`,
     authentication: {
       description: 'API key authentication (optional when no keys configured)',
@@ -109,7 +119,7 @@ app.get('/docs', (_req, res) => {
       { method: 'GET', path: '/car/:number',     description: 'Telemetry for one driver (RPM, speed, gear, throttle, brake, DRS)' },
       { method: 'GET', path: '/pits',            description: 'Pit stop data — all drivers, stint history, current tyre' },
       { method: 'GET', path: '/pits/:number',    description: 'Pit stops for a single driver' },
-      { method: 'GET', path: '/snapshot',        description: 'Raw dump of all 15 F1 timing topics' },
+      { method: 'GET', path: '/snapshot',        description: 'Raw dump of all 16 F1 timing topics' },
       { method: 'GET', path: '/stream',          description: 'SSE — every raw topic update. Filter: ?topic=TimingData' },
       { method: 'GET', path: '/stream/timing',   description: 'SSE — full leaderboard on each timing change' },
       { method: 'GET', path: '/calendar',        description: 'Full 2026 season calendar' },
@@ -125,6 +135,11 @@ app.get('/docs', (_req, res) => {
       { method: 'GET', path: '/telemetry/:number', description: 'Latest telemetry for one driver' },
       { method: 'GET', path: '/telemetry/stream/all', description: 'SSE — all drivers telemetry at ~3.7Hz' },
       { method: 'GET', path: '/telemetry/stream/:number', description: 'SSE — single driver telemetry at ~3.7Hz' },
+      { method: 'GET', path: '/team-radio',          description: 'All team radio messages with audio URLs (newest first)' },
+      { method: 'GET', path: '/team-radio/:number',  description: 'Team radio for a single driver' },
+      { method: 'GET', path: '/history',             description: 'List available seasons from F1 archive' },
+      { method: 'GET', path: '/history/:year',       description: 'List meetings and sessions for a season' },
+      { method: 'GET', path: '/history/session', description: 'Archived session data. Query: ?path=...&topic=TimingData' },
     ],
   });
 });
@@ -139,7 +154,9 @@ app.use('/pits',      pitsRouter);
 app.use('/calendar',  calendarRouter);
 app.use('/results',   resultsRouter);
 app.use('/standings', standingsRouter);
-app.use('/telemetry', telemetryRouter);
+app.use('/telemetry',   telemetryRouter);
+app.use('/team-radio',  teamRadioRouter);
+app.use('/history',     historyRouter);
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 app.use((req, res) => {

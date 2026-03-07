@@ -23,6 +23,7 @@ const TOPICS = [
   'SessionData',
   'LapCount',
   'TimingData',
+  'TeamRadio',
 ];
 
 const CONNECTION_DATA     = JSON.stringify([{ name: HUB }]);

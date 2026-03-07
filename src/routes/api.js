@@ -59,11 +59,17 @@ function buildTimingView() {
           const s  = td.Sectors?.[i]       || {};
           const bs = stat.BestSectors?.[i] || {};
           const usingFallback = !s.Value && !!bs.Value;
+          const segs = s.Segments || {};
+          const segArr = Array.isArray(segs) ? segs : Object.values(segs);
           return {
             value:         s.Value || bs.Value || null,
             personal_best: usingFallback ? false : (s.PersonalFastest || false),
             overall_best:  usingFallback ? bs.Position === 1 : (s.OverallFastest || false),
             stopped:       s.Stopped || false,
+            segments:      segArr.map((seg, j) => ({
+              index:  j,
+              status: seg?.Status ?? 0,
+            })),
           };
         }),
 
