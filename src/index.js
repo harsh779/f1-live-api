@@ -10,6 +10,11 @@ const calendarRouter  = require('./routes/calendar');
 const resultsRouter   = require('./routes/results');
 const standingsRouter = require('./routes/standings');
 const telemetryRouter = require('./routes/telemetry');
+const pitsRouter      = require('./routes/pits');
+
+const { globalLimiter, sseLimiter } = require('./middleware/rateLimiter');
+const apiKeyAuth                    = require('./middleware/apiKey');
+const csvFormat                     = require('./middleware/csvFormat');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -21,13 +26,23 @@ f1client.start();
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(globalLimiter);
+app.use(apiKeyAuth);
+app.use(csvFormat);
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 app.get('/', (_req, res) => {
   res.json({
     name: 'F1 Live Timing API',
+    version: '2.0.0',
     description: 'Direct connection to F1 live timing feed — no third-party APIs',
     source: 'livetiming.formula1.com (SignalR WebSocket)',
+    features: {
+      live_streaming: 'SSE at ~3.7Hz, real-time push from SignalR WebSocket',
+      csv_export:     'Add ?format=csv to any endpoint for CSV output',
+      rate_limiting:  '100 req/min per IP (RateLimit-* headers)',
+      authentication: 'API key via x-api-key header or ?api_key= (optional when unconfigured)',
+    },
     endpoints: {
       status:            'GET /status',
       drivers:           'GET /drivers',
@@ -37,6 +52,8 @@ app.get('/', (_req, res) => {
       track:             'GET /track',
       race_control:      'GET /race-control',
       car_telemetry:     'GET /car/:number',
+      pits:              'GET /pits',
+      pits_driver:       'GET /pits/:number',
       snapshot:          'GET /snapshot',
       stream_raw:        'GET /stream              (SSE)',
       stream_filtered:   'GET /stream?topic=X      (SSE)',
@@ -54,12 +71,71 @@ app.get('/', (_req, res) => {
       telemetry_driver:  'GET /telemetry/:number',
       telemetry_stream:  'GET /telemetry/stream/all   (SSE ~3.7Hz)',
       telemetry_stream1: 'GET /telemetry/stream/:number (SSE ~3.7Hz)',
+      docs:              'GET /docs',
     },
   });
 });
 
+// ── Documentation ────────────────────────────────────────────────────────────
+app.get('/docs', (_req, res) => {
+  res.json({
+    title: 'F1 Live Timing API Documentation',
+    version: '2.0.0',
+    base_url: `${_req.protocol}://${_req.get('host')}`,
+    authentication: {
+      description: 'API key authentication (optional when no keys configured)',
+      methods: [
+        'Header: x-api-key: YOUR_KEY',
+        'Query: ?api_key=YOUR_KEY',
+      ],
+    },
+    rate_limits: {
+      global: '100 requests per minute per IP',
+      sse_streams: '10 stream connections per minute per IP',
+      headers: ['RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
+    },
+    formats: {
+      json: 'Default. All endpoints return JSON.',
+      csv:  'Add ?format=csv to any endpoint. Returns CSV with flattened columns.',
+    },
+    endpoints: [
+      { method: 'GET', path: '/status',         description: 'Connection state, session info, clock, track flags' },
+      { method: 'GET', path: '/drivers',         description: 'List all drivers in current session' },
+      { method: 'GET', path: '/timing',          description: 'Full leaderboard — positions, gaps, sectors, tyres, telemetry' },
+      { method: 'GET', path: '/timing/:number',  description: 'Single driver timing data' },
+      { method: 'GET', path: '/weather',         description: 'Current weather conditions' },
+      { method: 'GET', path: '/track',           description: 'Track status and session state' },
+      { method: 'GET', path: '/race-control',    description: 'Race director messages (newest first)' },
+      { method: 'GET', path: '/car/:number',     description: 'Telemetry for one driver (RPM, speed, gear, throttle, brake, DRS)' },
+      { method: 'GET', path: '/pits',            description: 'Pit stop data — all drivers, stint history, current tyre' },
+      { method: 'GET', path: '/pits/:number',    description: 'Pit stops for a single driver' },
+      { method: 'GET', path: '/snapshot',        description: 'Raw dump of all 15 F1 timing topics' },
+      { method: 'GET', path: '/stream',          description: 'SSE — every raw topic update. Filter: ?topic=TimingData' },
+      { method: 'GET', path: '/stream/timing',   description: 'SSE — full leaderboard on each timing change' },
+      { method: 'GET', path: '/calendar',        description: 'Full 2026 season calendar' },
+      { method: 'GET', path: '/calendar/next',   description: 'Next upcoming session with countdown' },
+      { method: 'GET', path: '/calendar/current', description: 'Current race weekend (if active)' },
+      { method: 'GET', path: '/calendar/:round', description: 'Specific round details' },
+      { method: 'GET', path: '/results',         description: 'List all saved session results' },
+      { method: 'GET', path: '/results/:filename', description: 'Single saved result by filename' },
+      { method: 'GET', path: '/results/round/:round', description: 'All results for a round' },
+      { method: 'GET', path: '/standings/drivers', description: 'Driver championship standings' },
+      { method: 'GET', path: '/standings/constructors', description: 'Constructor championship standings' },
+      { method: 'GET', path: '/telemetry',        description: 'Latest telemetry for all drivers' },
+      { method: 'GET', path: '/telemetry/:number', description: 'Latest telemetry for one driver' },
+      { method: 'GET', path: '/telemetry/stream/all', description: 'SSE — all drivers telemetry at ~3.7Hz' },
+      { method: 'GET', path: '/telemetry/stream/:number', description: 'SSE — single driver telemetry at ~3.7Hz' },
+    ],
+  });
+});
+
+// ── SSE rate limit on stream endpoints ────────────────────────────────────────
+app.use('/stream',           sseLimiter);
+app.use('/telemetry/stream', sseLimiter);
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/',          apiRouter);
+app.use('/pits',      pitsRouter);
 app.use('/calendar',  calendarRouter);
 app.use('/results',   resultsRouter);
 app.use('/standings', standingsRouter);
