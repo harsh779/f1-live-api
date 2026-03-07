@@ -1,44 +1,74 @@
 const { EventEmitter } = require('events');
-const { deepMerge } = require('./merge');
+const { deepMerge }    = require('./merge');
+const persistence      = require('./persistence');
 
-/**
- * In-memory state store for all F1 timing topics.
- * Acts as an EventEmitter so SSE clients can subscribe to live updates.
- */
 class F1State extends EventEmitter {
   constructor() {
     super();
     this.setMaxListeners(200);
+    this._sessionSaved = false; // prevent double-saving same session
     this.reset();
+    this._loadPersistedState();
   }
 
   reset() {
-    this.connected    = false;
-    this.sessionInfo  = {};
-    this.sessionData  = {};
-    this.driverList   = {};
-    this.timingData   = {};
-    this.timingAppData = {};
-    this.timingStats  = {};
-    this.carData      = {};
-    this.position     = {};
-    this.weatherData  = {};
-    this.trackStatus  = {};
-    this.raceControl  = { Messages: [] };
-    this.lapCount     = {};
+    this.connected         = false;
+    this.sessionInfo       = {};
+    this.sessionData       = {};
+    this.driverList        = {};
+    this.timingData        = {};
+    this.timingAppData     = {};
+    this.timingStats       = {};
+    this.carData           = {};
+    this.position          = {};
+    this.weatherData       = {};
+    this.trackStatus       = {};
+    this.raceControl       = { Messages: [] };
+    this.lapCount          = {};
     this.extrapolatedClock = {};
-    this.topThree     = {};
-    this.heartbeat    = {};
-    this._lastUpdate  = null;
+    this.topThree          = {};
+    this.heartbeat         = {};
+    this._lastUpdate       = null;
+    this._sessionSaved     = false;
   }
 
-  /** Apply a differential patch from the F1 feed to the relevant topic state. */
+  /** On startup, restore the last known state so data survives restarts. */
+  _loadPersistedState() {
+    const saved = persistence.loadLastState();
+    if (!saved) return;
+    this.sessionInfo       = saved.session       || {};
+    this.sessionData       = saved.session_data  || {};
+    this.driverList        = saved.drivers       || {};
+    this.timingData        = saved.timing        || {};
+    this.timingAppData     = saved.timing_app    || {};
+    this.timingStats       = saved.timing_stats  || {};
+    this.weatherData       = saved.weather       || {};
+    this.trackStatus       = saved.track_status  || {};
+    this.raceControl       = saved.race_control  || { Messages: [] };
+    this.lapCount          = saved.lap_count     || {};
+    this.extrapolatedClock = saved.clock         || {};
+    this.topThree          = saved.top_three     || {};
+    this._lastUpdate       = saved.last_update   || null;
+    console.log('[F1] Restored persisted state from disk');
+  }
+
   applyUpdate(topic, data) {
     const ts = new Date().toISOString();
     this._lastUpdate = ts;
 
     switch (topic) {
-      case 'SessionInfo':       this.sessionInfo       = deepMerge(this.sessionInfo, data); break;
+      case 'SessionInfo':
+        // Detect when session changes — reset saved flag
+        if (data.Key && data.Key !== this.sessionInfo.Key) {
+          this._sessionSaved = false;
+        }
+        this.sessionInfo = deepMerge(this.sessionInfo, data);
+        // Auto-save when session is finalised
+        if (this.sessionInfo.SessionStatus === 'Finalised' && !this._sessionSaved) {
+          this._sessionSaved = true;
+          setImmediate(() => this._saveSession());
+        }
+        break;
       case 'SessionData':       this.sessionData       = deepMerge(this.sessionData, data); break;
       case 'DriverList':        this.driverList        = deepMerge(this.driverList, data); break;
       case 'TimingData':        this.timingData        = deepMerge(this.timingData, data); break;
@@ -56,48 +86,68 @@ class F1State extends EventEmitter {
       case 'Heartbeat':         this.heartbeat         = data; break;
       case 'RaceControlMessages':
         if (data?.Messages) {
-          // Merge new messages (keyed by index) into the messages list
           const existing = this.raceControl.Messages || [];
-          const patch = data.Messages;
+          const patch    = data.Messages;
           if (Array.isArray(patch)) {
             this.raceControl.Messages = [...existing, ...patch];
           } else {
-            // Object with numeric keys
             Object.values(patch).forEach(msg => existing.push(msg));
             this.raceControl.Messages = existing;
           }
         }
         break;
-      default:
-        break;
+      default: break;
     }
+
+    // Persist state to disk every 30 seconds (debounced)
+    this._schedulePersist();
 
     this.emit('update', { topic, data, timestamp: ts });
     this.emit(`topic:${topic}`, { data, timestamp: ts });
   }
 
-  /** Returns a clean snapshot of everything. */
+  _saveSession() {
+    const filename = persistence.saveSessionResult(
+      this.sessionInfo,
+      this.timingData,
+      this.timingAppData,
+      this.timingStats,
+      this.weatherData,
+      this.lapCount,
+    );
+    if (filename) {
+      this.emit('session:saved', { filename, session: this.sessionInfo });
+    }
+  }
+
+  _schedulePersist() {
+    if (this._persistTimer) return;
+    this._persistTimer = setTimeout(() => {
+      this._persistTimer = null;
+      persistence.saveLastState(this.snapshot());
+    }, 30000); // debounce: write at most every 30s
+  }
+
   snapshot() {
     return {
-      connected:        this.connected,
-      last_update:      this._lastUpdate,
-      session:          this.sessionInfo,
-      session_data:     this.sessionData,
-      drivers:          this.driverList,
-      timing:           this.timingData,
-      timing_app:       this.timingAppData,
-      timing_stats:     this.timingStats,
-      car_data:         this.carData,
-      position:         this.position,
-      weather:          this.weatherData,
-      track_status:     this.trackStatus,
-      race_control:     this.raceControl,
-      lap_count:        this.lapCount,
-      clock:            this.extrapolatedClock,
-      top_three:        this.topThree,
+      connected:    this.connected,
+      last_update:  this._lastUpdate,
+      session:      this.sessionInfo,
+      session_data: this.sessionData,
+      drivers:      this.driverList,
+      timing:       this.timingData,
+      timing_app:   this.timingAppData,
+      timing_stats: this.timingStats,
+      car_data:     this.carData,
+      position:     this.position,
+      weather:      this.weatherData,
+      track_status: this.trackStatus,
+      race_control: this.raceControl,
+      lap_count:    this.lapCount,
+      clock:        this.extrapolatedClock,
+      top_three:    this.topThree,
     };
   }
 }
 
-// Singleton
 module.exports = new F1State();
