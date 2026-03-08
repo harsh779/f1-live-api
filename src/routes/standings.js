@@ -38,10 +38,17 @@ function calculateDriverStandings() {
   processResults(loadResultsByType('Race'),   RACE_POINTS,   false);
   processResults(loadResultsByType('Sprint'), SPRINT_POINTS, true);
 
-  // Enrich with driver info from current state
+  // Enrich with driver info from current state — include ALL drivers, not just those with results
   const driverList = state.driverList || {};
 
-  return Object.keys({ ...points, ...wins })
+  // Merge driver numbers from results AND from the full driverList
+  const allNums = new Set([
+    ...Object.keys(points),
+    ...Object.keys(wins),
+    ...Object.keys(driverList),
+  ]);
+
+  return [...allNums]
     .filter(num => /^\d+$/.test(num))
     .map(num => {
       const d = driverList[num] || {};
@@ -57,6 +64,7 @@ function calculateDriverStandings() {
         podiums:       podiums[num] || 0,
       };
     })
+    .filter(d => d.name) // only include drivers we have info for
     .sort((a, b) => b.points - a.points || b.wins - a.wins)
     .map((entry, i) => ({ ...entry, position: i + 1 }));
 }
