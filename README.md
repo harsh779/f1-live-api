@@ -8,7 +8,15 @@ A self-sufficient Formula 1 live data API that connects **directly** to F1's own
 
 ## How It Works
 
-The API connects to F1's SignalR WebSocket at `livetiming.formula1.com`, subscribes to 16 live topics (including TeamRadio), and deep-merges the differential patches into a running in-memory state. Compressed topics (`CarData.z`, `Position.z`) are decompressed on receipt using zlib. State is persisted to disk every 30 seconds and restored on restart. Session results are saved automatically when the feed signals `Finalised`.
+The API connects to F1's SignalR WebSocket at `livetiming.formula1.com`, subscribes to 16 live topics, and deep-merges the differential patches into a running in-memory state. Compressed topics (`CarData.z`, `Position.z`) are decompressed on receipt using zlib.
+
+**Resilience:**
+- State is persisted to disk every 30 seconds (debounced) and fully restored on restart — no data loss across deploys
+- WebSocket reconnects automatically with exponential backoff (2s initial, 30s max)
+- Session results are saved automatically when the feed signals `Finalised`, with duplicate-save prevention
+- CORS enabled — accepts requests from any origin
+
+**Subscribed topics:** `Heartbeat`, `CarData.z`, `Position.z`, `ExtrapolatedClock`, `TopThree`, `TimingStats`, `TimingAppData`, `WeatherData`, `TrackStatus`, `DriverList`, `RaceControlMessages`, `SessionInfo`, `SessionData`, `LapCount`, `TimingData`, `TeamRadio`
 
 ---
 
@@ -19,11 +27,16 @@ The API connects to F1's SignalR WebSocket at `livetiming.formula1.com`, subscri
 | Live streaming | SSE at ~3.7 Hz, real-time push from SignalR WebSocket |
 | Mini-sectors | Segment-level timing data — the colored blocks you see on F1 TV |
 | Team radio | Audio file URLs for team radio messages during live sessions |
+| Driver telemetry | Speed, RPM, gear, throttle, brake, DRS for all 22 cars in real time |
+| Pit strategy | Stint tracking, tyre compounds, pit stop counts, in/out flags |
 | Historical data | Full F1 archive access — every session back to 2018 |
+| Session persistence | Results auto-saved with embedded driver info on session finalisation |
+| Championship standings | Driver and constructor standings calculated from saved results |
+| 2026 calendar | All 24 rounds with session times, track data, lat/lon coordinates |
 | CSV export | Append `?format=csv` to any endpoint for CSV output |
 | Rate limiting | 100 req/min per IP, 10 SSE connections/min (RateLimit-* headers) |
 | Authentication | Optional API key via `x-api-key` header or `?api_key=` query param |
-| Auto-documentation | `GET /docs` returns full machine-readable endpoint reference |
+| Auto-documentation | `GET /` and `GET /docs` return full machine-readable endpoint reference |
 
 ---
 
@@ -113,24 +126,56 @@ curl https://f1-live-api.onrender.com/standings/drivers?format=csv
 - Nested objects are flattened with `_` separators (e.g. `telemetry_speed`)
 - Arrays are JSON-stringified in cells
 - Response includes `Content-Type: text/csv` and `Content-Disposition: attachment` headers
+- Falls back to JSON if no tabular data is detected
 
 ---
 
 ## Endpoints
+
+### Discovery
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | API overview — name, version, features, and full endpoint reference |
+| GET | `/docs` | Machine-readable API documentation (JSON) |
 
 ### Live Timing
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/status` | Connection status, session info, lap count, clock, track flags |
-| GET | `/drivers` | All drivers — name, acronym, team, team colour, headshot URL |
-| GET | `/timing` | Full leaderboard — positions, gaps, sectors, mini-sectors, tyres, telemetry |
+| GET | `/drivers` | All drivers — name, acronym, team, team colour, country code, headshot URL |
+| GET | `/timing` | Full leaderboard — positions, gaps, sectors, mini-sectors, speed traps, tyres, telemetry |
 | GET | `/timing/:number` | Single driver timing data |
 | GET | `/weather` | Air temp, track temp, humidity, wind speed, rainfall |
 | GET | `/track` | Track status and current flag |
 | GET | `/race-control` | Race control messages — penalties, flags, notifications (newest first) |
 | GET | `/car/:number` | Raw telemetry for one car (RPM, speed, gear, throttle, brake, DRS) |
 | GET | `/snapshot` | Full raw dump of all 16 in-memory timing topics |
+
+**Driver fields in `/timing` response:**
+
+| Field | Description |
+|-------|-------------|
+| `position` | Current race/session position |
+| `gap_to_leader` | Time gap to P1 |
+| `interval` | Gap to car ahead |
+| `last_lap_time` | Most recent lap time |
+| `best_lap_time` | Session personal best |
+| `last_lap_personal_best` | Boolean — was the last lap a personal best? |
+| `last_lap_overall_best` | Boolean — was the last lap the overall fastest? |
+| `tyre_compound` | Current tyre (SOFT, MEDIUM, HARD, INTERMEDIATE, WET) |
+| `tyre_laps` | Laps completed on current tyre |
+| `tyre_new` | Boolean — was the tyre new when fitted? |
+| `stint_number` | Current stint number (counting from 1) |
+| `in_pit` | Boolean — driver is in pit lane |
+| `pit_out` | Boolean — driver has just exited pits |
+| `retired` | Boolean — driver has retired from session |
+| `stopped` | Boolean — driver is stationary |
+| `knock_out` | Boolean — eliminated in qualifying (Q1/Q2) |
+| `speed_traps` | Object with `i1`, `i2`, `fl`, `st` (intermediate 1, intermediate 2, finish line, speed trap) |
+| `sectors[]` | Array of sector objects with `value`, `personal_best`, `overall_best`, `stopped`, and `segments[]` |
+| `telemetry` | Embedded telemetry snapshot (rpm, speed, gear, throttle, brake, drs) |
 
 ### Pit Stops
 
@@ -170,7 +215,14 @@ Each message includes:
 
 **Telemetry fields:** `rpm`, `speed`, `gear`, `throttle` (0-100), `brake` (0/1), `drs`, `drs_label`
 
-DRS label values: `off` / `eligible` / `on` / `active`
+**DRS label values:**
+
+| DRS Code | Label | Meaning |
+|----------|-------|---------|
+| 0 | `off` | DRS not available |
+| 8 | `eligible` | DRS available but not activated |
+| 10 | `on` | DRS primed |
+| 12 | `active` | DRS flap open |
 
 ### SSE Streams
 
@@ -186,22 +238,37 @@ All SSE endpoints send an initial `snapshot` event on connect, then push live `d
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/calendar` | Full 2026 season — all 24 rounds |
-| GET | `/calendar/next` | Next upcoming session with minute countdown |
-| GET | `/calendar/current` | Active race weekend (if any) |
+| GET | `/calendar` | Full 2026 season — all 24 rounds with track coordinates |
+| GET | `/calendar/next` | Next upcoming session with minute countdown, sprint flag, track info, and all weekend sessions |
+| GET | `/calendar/current` | Active race weekend (4-hour buffer after final session) |
 | GET | `/calendar/:round` | Details for a specific round number |
+
+Each round includes:
+- Round number, name, country, circuit
+- All session times (FP1, FP2, FP3, Qualifying, Sprint Qualifying, Sprint, Race)
+- Sprint weekend detection (`has_sprint`)
+- Track data — length, laps, corners, lap record, history
+- Latitude and longitude coordinates
 
 ### Results & Standings
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/results` | List all saved session results |
-| GET | `/results/:filename` | Full result for a saved session |
+| GET | `/results/:filename` | Full result for a saved session (includes embedded driver info) |
 | GET | `/results/round/:round` | All sessions for a given round number |
 | GET | `/standings/drivers` | Driver championship standings |
 | GET | `/standings/constructors` | Constructor championship standings |
 
-Results are saved automatically when a session is finalised. Filenames follow the pattern `2026_R01_Race.json`.
+Results are saved automatically when a session is finalised. Each result includes:
+- Full classification (position, gaps, best laps, laps completed)
+- Tyre stint data (compounds, stint lengths, new/used)
+- Speed trap data (I1, I2, FL, ST)
+- Embedded driver map (name, acronym, team, team colour) for offline display
+- Weather snapshot at time of save
+- Fastest lap info
+
+Filenames follow the pattern `2026_R01_Race.json` (validated against `^\d{4}_R\d{2}_\w+\.json$`).
 
 Standings use the 2026 points system:
 - **Race:** 25 / 18 / 15 / 12 / 10 / 8 / 6 / 4 / 2 / 1
@@ -216,7 +283,7 @@ Standings use the 2026 points system:
 | GET | `/history/:year` | List all meetings and sessions for a season |
 | GET | `/history/session?path=...&topic=...` | Fetch archived session data by topic |
 
-The history endpoints proxy the F1 static archive at `livetiming.formula1.com/static/`. Data is cached for 5 minutes.
+The history endpoints proxy the F1 static archive at `livetiming.formula1.com/static/`. Responses are cached in-memory with a 5-minute TTL. Path parameters are validated against `^[\w\-./]+$` to prevent traversal attacks. UTF-8 BOM is stripped automatically from F1's archive responses.
 
 **Usage flow:**
 
@@ -233,13 +300,7 @@ curl https://f1-live-api.onrender.com/history/2026
 curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Australian_Grand_Prix/2026-03-07_Qualifying/&topic=TimingData"
 ```
 
-**Available topics:** `SessionInfo`, `TimingData`, `TimingAppData`, `TimingStats`, `WeatherData`, `TrackStatus`, `RaceControlMessages`, `DriverList`, `LapCount`, `TopThree`, `TeamRadio`, `SessionData`, `ExtrapolatedClock`, `Heartbeat`
-
-### Documentation
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/docs` | Full machine-readable API documentation (JSON) |
+**Available topics (14):** `SessionInfo`, `TimingData`, `TimingAppData`, `TimingStats`, `WeatherData`, `TrackStatus`, `RaceControlMessages`, `DriverList`, `LapCount`, `TopThree`, `TeamRadio`, `SessionData`, `ExtrapolatedClock`, `Heartbeat`
 
 ---
 
@@ -254,15 +315,17 @@ curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Aust
   "drivers": [
     {
       "driver_number": "1",
-      "name": "Max Verstappen",
-      "acronym": "VER",
-      "team": "Red Bull Racing",
-      "team_colour": "3671C6",
+      "name": "Lando Norris",
+      "acronym": "NOR",
+      "team": "McLaren",
+      "team_colour": "F47600",
       "position": "1",
       "gap_to_leader": "0.000",
       "interval": "0.000",
       "last_lap_time": "1:21.456",
       "best_lap_time": "1:20.123",
+      "last_lap_personal_best": true,
+      "last_lap_overall_best": false,
       "sectors": [
         {
           "value": "23.145",
@@ -279,7 +342,13 @@ curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Aust
       "speed_traps": { "i1": "312", "i2": "298", "fl": "321", "st": "315" },
       "tyre_compound": "SOFT",
       "tyre_laps": 12,
+      "tyre_new": true,
+      "stint_number": 2,
       "in_pit": false,
+      "pit_out": false,
+      "retired": false,
+      "stopped": false,
+      "knock_out": false,
       "telemetry": {
         "rpm": 11823,
         "speed": 312,
@@ -302,6 +371,22 @@ curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Aust
 | 2049 | Yellow (slower) | Yellow |
 | 2051 | Personal best | Green |
 | 2064 | Overall fastest | Purple |
+
+### `GET /drivers`
+
+```json
+[
+  {
+    "driver_number": "1",
+    "name": "Lando Norris",
+    "acronym": "NOR",
+    "team": "McLaren",
+    "team_colour": "F47600",
+    "country_code": "GBR",
+    "headshot_url": "https://..."
+  }
+]
+```
 
 ### `GET /pits/44`
 
@@ -337,9 +422,9 @@ curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Aust
   "messages": [
     {
       "driver_number": "1",
-      "name": "Max Verstappen",
-      "acronym": "VER",
-      "team": "Red Bull Racing",
+      "name": "Lando Norris",
+      "acronym": "NOR",
+      "team": "McLaren",
       "timestamp": "2026-03-16T14:44:30.000Z",
       "audio_url": "https://livetiming.formula1.com/static/2026/..."
     }
@@ -355,7 +440,7 @@ curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Aust
   "name": "Lewis Hamilton",
   "acronym": "HAM",
   "team": "Ferrari",
-  "team_colour": "E8002D",
+  "team_colour": "ED1131",
   "telemetry": {
     "timestamp": "2026-03-16T14:32:01.123Z",
     "rpm": 11823,
@@ -366,6 +451,23 @@ curl "https://f1-live-api.onrender.com/history/session?path=2026/2026-03-08_Aust
     "drs": 12,
     "drs_label": "active"
   }
+}
+```
+
+### `GET /calendar/next`
+
+```json
+{
+  "round": 2,
+  "name": "Chinese Grand Prix",
+  "country": "China",
+  "circuit": "Shanghai International Circuit",
+  "session": "Race",
+  "time": "2026-03-22T07:00:00Z",
+  "minutes_away": 1440,
+  "has_sprint": true,
+  "all_sessions": { "fp1": "...", "sprint_qualifying": "...", "sprint": "...", "qualifying": "...", "race": "..." },
+  "track": { "length": "5.451 km", "laps": 56, "corners": 16 }
 }
 ```
 
@@ -476,6 +578,7 @@ curl -N https://f1-live-api.onrender.com/stream/timing
 - **WebSocket:** `ws`
 - **Rate Limiting:** `express-rate-limit`
 - **Decompression:** Node.js built-in `zlib`
+- **Logging:** `morgan`
 - **No third-party F1 data APIs**
 
 ---
