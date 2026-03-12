@@ -1,4 +1,4 @@
-# F1 Live Timing API
+# F1 Insights API
 
 A self-sufficient Formula 1 live data API that connects **directly** to F1's own live timing infrastructure — no third-party data providers, no OpenF1, no Ergast. Every data point originates from the same feed that powers the official F1 app.
 
