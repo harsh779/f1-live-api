@@ -608,8 +608,8 @@
       "stints": [
         {
           "stint": null,
-          "compound": null,
-          "new": false,
+          "compound": "SOFT",
+          "new": "true",
           "laps": 6
         },
         {
@@ -1031,5 +1031,139 @@
         "st": null
       }
     }
-  ]
+  ],
+  "drivers": {
+    "1": {
+      "name": "Lando Norris",
+      "acronym": "NOR",
+      "team": "McLaren",
+      "team_color": "#F47600"
+    },
+    "3": {
+      "name": "Max Verstappen",
+      "acronym": "VER",
+      "team": "Red Bull Racing",
+      "team_color": "#4781D7"
+    },
+    "5": {
+      "name": "Gabriel Bortoleto",
+      "acronym": "BOR",
+      "team": "Audi",
+      "team_color": "#F50537"
+    },
+    "6": {
+      "name": "Isack Hadjar",
+      "acronym": "HAD",
+      "team": "Red Bull Racing",
+      "team_color": "#4781D7"
+    },
+    "10": {
+      "name": "Pierre Gasly",
+      "acronym": "GAS",
+      "team": "Alpine",
+      "team_color": "#00A1E8"
+    },
+    "11": {
+      "name": "Sergio Perez",
+      "acronym": "PER",
+      "team": "Cadillac",
+      "team_color": "#909090"
+    },
+    "12": {
+      "name": "Kimi Antonelli",
+      "acronym": "ANT",
+      "team": "Mercedes",
+      "team_color": "#00D7B6"
+    },
+    "14": {
+      "name": "Fernando Alonso",
+      "acronym": "ALO",
+      "team": "Aston Martin",
+      "team_color": "#229971"
+    },
+    "16": {
+      "name": "Charles Leclerc",
+      "acronym": "LEC",
+      "team": "Ferrari",
+      "team_color": "#ED1131"
+    },
+    "18": {
+      "name": "Lance Stroll",
+      "acronym": "STR",
+      "team": "Aston Martin",
+      "team_color": "#229971"
+    },
+    "23": {
+      "name": "Alexander Albon",
+      "acronym": "ALB",
+      "team": "Williams",
+      "team_color": "#1868DB"
+    },
+    "27": {
+      "name": "Nico Hulkenberg",
+      "acronym": "HUL",
+      "team": "Audi",
+      "team_color": "#F50537"
+    },
+    "30": {
+      "name": "Liam Lawson",
+      "acronym": "LAW",
+      "team": "Racing Bulls",
+      "team_color": "#6C98FF"
+    },
+    "31": {
+      "name": "Esteban Ocon",
+      "acronym": "OCO",
+      "team": "Haas F1 Team",
+      "team_color": "#9C9FA2"
+    },
+    "41": {
+      "name": "Arvid Lindblad",
+      "acronym": "LIN",
+      "team": "Racing Bulls",
+      "team_color": "#6C98FF"
+    },
+    "43": {
+      "name": "Franco Colapinto",
+      "acronym": "COL",
+      "team": "Alpine",
+      "team_color": "#00A1E8"
+    },
+    "44": {
+      "name": "Lewis Hamilton",
+      "acronym": "HAM",
+      "team": "Ferrari",
+      "team_color": "#ED1131"
+    },
+    "55": {
+      "name": "Carlos Sainz",
+      "acronym": "SAI",
+      "team": "Williams",
+      "team_color": "#1868DB"
+    },
+    "63": {
+      "name": "George Russell",
+      "acronym": "RUS",
+      "team": "Mercedes",
+      "team_color": "#00D7B6"
+    },
+    "77": {
+      "name": "Valtteri Bottas",
+      "acronym": "BOT",
+      "team": "Cadillac",
+      "team_color": "#909090"
+    },
+    "81": {
+      "name": "Oscar Piastri",
+      "acronym": "PIA",
+      "team": "McLaren",
+      "team_color": "#F47600"
+    },
+    "87": {
+      "name": "Oliver Bearman",
+      "acronym": "BEA",
+      "team": "Haas F1 Team",
+      "team_color": "#9C9FA2"
+    }
+  }
 }

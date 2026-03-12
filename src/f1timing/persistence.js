@@ -13,7 +13,7 @@ if (!fs.existsSync(RESULTS_DIR)) fs.mkdirSync(RESULTS_DIR, { recursive: true });
  * Filename: YYYY_R{round:02d}_{SessionType}.json
  * e.g. 2026_R01_Race.json, 2026_R01_Qualifying.json
  */
-function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherData, lapCount) {
+function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherData, lapCount, driverList) {
   try {
     const year    = sessionInfo.StartDate?.slice(0, 4) || new Date().getFullYear();
     const round   = String(sessionInfo.Meeting?.Number || 0).padStart(2, '0');
@@ -70,6 +70,19 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
         }
       });
 
+    // Build compact driver lookup from DriverList
+    const drivers = {};
+    if (driverList) {
+      Object.entries(driverList).filter(([num]) => /^\d+$/.test(num)).forEach(([num, d]) => {
+        drivers[num] = {
+          name: [d.FirstName, d.LastName].filter(Boolean).join(' ') || d.Tla || null,
+          acronym: d.Tla || null,
+          team: d.TeamName || null,
+          team_color: d.TeamColour ? '#' + d.TeamColour : null,
+        };
+      });
+    }
+
     const output = {
       meta: {
         year,
@@ -81,6 +94,7 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
         date: sessionInfo.StartDate || null,
         total_laps: lapCount?.TotalLaps || null,
       },
+      drivers,
       weather: weatherData || {},
       fastest_lap: fastestLap,
       results,

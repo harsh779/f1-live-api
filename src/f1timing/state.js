@@ -128,6 +128,7 @@ class F1State extends EventEmitter {
       this.timingStats,
       this.weatherData,
       this.lapCount,
+      this.driverList,
     );
     if (filename) {
       this.emit('session:saved', { filename, session: this.sessionInfo });
