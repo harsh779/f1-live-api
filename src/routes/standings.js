@@ -101,6 +101,15 @@ function calculateConstructorStandings() {
   processResults(loadResultsByType('Race'),   RACE_POINTS,   false);
   processResults(loadResultsByType('Sprint'), SPRINT_POINTS, true);
 
+  // Include all teams from driverList so teams with 0 points still appear
+  const driverList = state.driverList || {};
+  Object.values(driverList).forEach(d => {
+    if (d.TeamName && !(d.TeamName in points)) {
+      points[d.TeamName] = 0;
+      wins[d.TeamName]   = 0;
+    }
+  });
+
   return Object.keys(points)
     .map(team => ({ position: null, team, points: points[team] || 0, wins: wins[team] || 0 }))
     .sort((a, b) => b.points - a.points || b.wins - a.wins)
