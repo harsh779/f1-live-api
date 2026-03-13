@@ -5,6 +5,7 @@ const cors       = require('cors');
 const morgan     = require('morgan');
 
 const f1client        = require('./f1timing/client');
+const { backfillResults } = require('./f1timing/backfill');
 const apiRouter       = require('./routes/api');
 const calendarRouter  = require('./routes/calendar');
 const resultsRouter   = require('./routes/results');
@@ -23,6 +24,9 @@ const PORT = process.env.PORT || 3000;
 
 // ── Start direct F1 live timing WebSocket ─────────────────────────────────────
 f1client.start();
+
+// ── Backfill any missing race/sprint results from Ergast ──────────────────────
+backfillResults().catch(e => console.warn('[BACKFILL] Error:', e.message));
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
