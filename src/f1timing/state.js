@@ -87,7 +87,6 @@ class F1State extends EventEmitter {
       case 'TopThree':          this.topThree          = deepMerge(this.topThree, data); break;
       case 'Heartbeat':         this.heartbeat         = data; break;
       case 'TeamRadio':
-        console.log('[F1] TeamRadio update received:', JSON.stringify(data).slice(0, 300));
         if (data?.Captures) {
           const existing = this.teamRadio.Captures || [];
           const patch    = data.Captures;
