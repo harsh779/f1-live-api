@@ -114,6 +114,9 @@ function handleMessage(raw) {
 
   // "R" = subscribe callback — contains initial full state for all topics
   if (msg.R && typeof msg.R === 'object') {
+    const topics = Object.keys(msg.R);
+    console.log('[F1] Subscribe response topics:', topics.join(', '));
+    if (msg.R.TeamRadio) console.log('[F1] Initial TeamRadio:', JSON.stringify(msg.R.TeamRadio).slice(0, 500));
     Object.entries(msg.R).forEach(([topic, data]) => {
       if (data && typeof data === 'object' && Object.keys(data).length > 0) {
         processFeedMessage(topic, data);
