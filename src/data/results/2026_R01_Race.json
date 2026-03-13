@@ -313,7 +313,7 @@
       "gap_to_leader": "Lapped",
       "best_lap_time": "1:25.410",
       "best_lap_number": 36,
-      "retired": true,
+      "retired": false,
       "stopped": false,
       "in_pit": false,
       "stints": [],
