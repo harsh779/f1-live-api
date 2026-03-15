@@ -90,7 +90,7 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
         meeting: sessionInfo.Meeting?.Name || null,
         circuit: sessionInfo.Meeting?.Circuit?.ShortName || null,
         session_name: sessionInfo.Name || null,
-        session_type: sessionInfo.Type || null,
+        session_type: (sessionInfo.Name || '').includes('Sprint') ? 'Sprint ' + (sessionInfo.Type || '') : (sessionInfo.Type || null),
         date: sessionInfo.StartDate || null,
         total_laps: lapCount?.TotalLaps || null,
       },
