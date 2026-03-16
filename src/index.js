@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3000;
 // ── Start direct F1 live timing WebSocket ─────────────────────────────────────
 f1client.start();
 
-// ── Backfill any missing race/sprint results from Ergast ──────────────────────
+// ── Backfill any missing completed-session results from F1 archive ────────────
 backfillResults().catch(e => console.warn('[BACKFILL] Error:', e.message));
 
 // ── Middleware ────────────────────────────────────────────────────────────────

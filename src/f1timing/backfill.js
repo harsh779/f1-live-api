@@ -8,7 +8,6 @@ const RESULTS_DIR = process.env.DATA_DIR
   ? path.join(process.env.DATA_DIR, 'results')
   : path.join(__dirname, '../data/results');
 
-const ERGAST_BASE = 'https://api.jolpi.ca/ergast/f1/2026';
 const STATIC_BASE = 'https://livetiming.formula1.com/static';
 const ARCHIVE_YEAR = '2026';
 
@@ -80,7 +79,15 @@ async function backfillArchiveSession(round, archiveIndex, sessionName) {
   const roundStr = String(round.round).padStart(2, '0');
   const filename = `2026_R${roundStr}_${sessionName.replace(/\s+/g, '_')}.json`;
   const filepath = path.join(RESULTS_DIR, filename);
-  if (fs.existsSync(filepath)) return;
+  if (fs.existsSync(filepath)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+      if (existing?.meta?.source !== 'ergast-backfill') return;
+      console.log(`[BACKFILL] Replacing legacy ${filename} with F1 archive data`);
+    } catch {
+      // If the existing file is unreadable, attempt to rebuild it from archive.
+    }
+  }
 
   const meeting = getArchiveMeeting(archiveIndex, round);
   if (!meeting) {
@@ -129,150 +136,32 @@ async function backfillArchiveSession(round, archiveIndex, sessionName) {
   }
 }
 
+async function ensureArchiveSession(round, archiveIndex, sessionName, sessionDate) {
+  if (!sessionDate || new Date(sessionDate) > new Date()) return;
+  await backfillArchiveSession(round, archiveIndex, sessionName);
+}
+
 /**
- * Backfill missing results for completed sessions.
- * Runs once on startup and only fetches rounds whose session date has passed
+ * Backfill missing results for completed sessions using only F1's archive.
+ * Runs once on startup and only fetches sessions whose scheduled date has passed
  * and whose result file does not already exist.
  */
 async function backfillResults() {
   const now = new Date();
-  let archiveIndex = null;
+  const archiveIndex = await fetchJSON(`${STATIC_BASE}/${ARCHIVE_YEAR}/Index.json`);
 
   for (const round of calendar2026) {
     const raceDate = new Date(round.sessions.race);
     if (raceDate > now) continue;
 
-    const roundStr = String(round.round).padStart(2, '0');
-
-    if (round.sessions.qualifying && new Date(round.sessions.qualifying) <= now) {
-      try {
-        archiveIndex ||= await fetchJSON(`${STATIC_BASE}/${ARCHIVE_YEAR}/Index.json`);
-        await backfillArchiveSession(round, archiveIndex, 'Qualifying');
-      } catch (e) {
-        console.warn(`[BACKFILL] Failed to prepare archive Qualifying R${roundStr}:`, e.message);
-      }
-    }
-
-    if (round.hasSprint && round.sessions.sprint_qualifying && new Date(round.sessions.sprint_qualifying) <= now) {
-      try {
-        archiveIndex ||= await fetchJSON(`${STATIC_BASE}/${ARCHIVE_YEAR}/Index.json`);
-        await backfillArchiveSession(round, archiveIndex, 'Sprint Qualifying');
-      } catch (e) {
-        console.warn(`[BACKFILL] Failed to prepare archive Sprint Qualifying R${roundStr}:`, e.message);
-      }
-    }
-
-    const raceFile = path.join(RESULTS_DIR, `2026_R${roundStr}_Race.json`);
-    if (!fs.existsSync(raceFile)) {
-      try {
-        const data = await fetchJSON(`${ERGAST_BASE}/${round.round}/results.json`);
-        const races = data?.MRData?.RaceTable?.Races || [];
-        if (races.length > 0 && races[0].Results?.length > 0) {
-          const result = buildResultFromErgast(races[0], round, 'Race');
-          fs.writeFileSync(raceFile, JSON.stringify(result, null, 2));
-          console.log(`[BACKFILL] Saved ${path.basename(raceFile)}`);
-        }
-      } catch (e) {
-        console.warn(`[BACKFILL] Failed to fetch Race R${roundStr}:`, e.message);
-      }
-    }
+    await ensureArchiveSession(round, archiveIndex, 'Qualifying', round.sessions.qualifying);
+    await ensureArchiveSession(round, archiveIndex, 'Race', round.sessions.race);
 
     if (round.hasSprint) {
-      const sprintFile = path.join(RESULTS_DIR, `2026_R${roundStr}_Sprint.json`);
-      if (!fs.existsSync(sprintFile)) {
-        try {
-          const data = await fetchJSON(`${ERGAST_BASE}/${round.round}/sprint.json`);
-          const races = data?.MRData?.RaceTable?.Races || [];
-          if (races.length > 0 && races[0].SprintResults?.length > 0) {
-            const result = buildSprintFromErgast(races[0], round);
-            fs.writeFileSync(sprintFile, JSON.stringify(result, null, 2));
-            console.log(`[BACKFILL] Saved ${path.basename(sprintFile)}`);
-          }
-        } catch (e) {
-          console.warn(`[BACKFILL] Failed to fetch Sprint R${roundStr}:`, e.message);
-        }
-      }
+      await ensureArchiveSession(round, archiveIndex, 'Sprint Qualifying', round.sessions.sprint_qualifying);
+      await ensureArchiveSession(round, archiveIndex, 'Sprint', round.sessions.sprint);
     }
   }
-}
-
-function buildResultFromErgast(race, round, sessionType) {
-  const results = race.Results.map(r => ({
-    position: parseInt(r.position),
-    driver_number: r.number,
-    laps_completed: parseInt(r.laps) || null,
-    gap_to_leader: r.Time?.time || (r.status !== 'Finished' ? r.status : null),
-    best_lap_time: r.FastestLap?.Time?.time || null,
-    best_lap_number: r.FastestLap?.lap ? parseInt(r.FastestLap.lap) : null,
-    retired: ['Retired', 'Did not start', 'Did not finish', 'Disqualified', 'Excluded', 'Withdrawn'].includes(r.status),
-    stopped: false,
-    in_pit: false,
-    stints: [],
-    speed_traps: { i1: null, i2: null, fl: null, st: null },
-  }));
-
-  let fastestLap = null;
-  race.Results.forEach(r => {
-    if (r.FastestLap?.rank === '1') {
-      fastestLap = {
-        driver_number: r.number,
-        time: r.FastestLap.Time?.time || null,
-        lap: r.FastestLap.lap ? parseInt(r.FastestLap.lap) : null,
-      };
-    }
-  });
-
-  return {
-    meta: {
-      year: '2026',
-      round: round.round,
-      meeting: round.name,
-      circuit: round.circuit,
-      session_name: sessionType,
-      session_type: sessionType,
-      date: round.sessions.race,
-      total_laps: round.track.laps,
-      source: 'ergast-backfill',
-    },
-    drivers: {},
-    weather: {},
-    fastest_lap: fastestLap,
-    results,
-  };
-}
-
-function buildSprintFromErgast(race, round) {
-  const results = race.SprintResults.map(r => ({
-    position: parseInt(r.position),
-    driver_number: r.number,
-    laps_completed: parseInt(r.laps) || null,
-    gap_to_leader: r.Time?.time || (r.status !== 'Finished' ? r.status : null),
-    best_lap_time: r.FastestLap?.Time?.time || null,
-    best_lap_number: null,
-    retired: ['Retired', 'Did not start', 'Did not finish', 'Disqualified', 'Excluded', 'Withdrawn'].includes(r.status),
-    stopped: false,
-    in_pit: false,
-    stints: [],
-    speed_traps: { i1: null, i2: null, fl: null, st: null },
-  }));
-
-  return {
-    meta: {
-      year: '2026',
-      round: round.round,
-      meeting: round.name,
-      circuit: round.circuit,
-      session_name: 'Sprint',
-      session_type: 'Sprint',
-      date: round.sessions.sprint,
-      total_laps: null,
-      source: 'ergast-backfill',
-    },
-    drivers: {},
-    weather: {},
-    fastest_lap: null,
-    results,
-  };
 }
 
 module.exports = { backfillResults };
