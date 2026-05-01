@@ -1,11 +1,43 @@
-const https = require('https');
-const WebSocket = require('ws');
+const https      = require('https');
+const http       = require('http');
+const net        = require('net');
+const WebSocket  = require('ws');
 const { decompress } = require('./decompress');
 const state = require('./state');
 
 const BASE_URL = 'livetiming.formula1.com';
 const HUB      = 'streaming';
 const PROTOCOL = '1.5';
+
+// Optional HTTP CONNECT proxy (residential IP to bypass CloudFront WAF).
+// Set F1_PROXY_URL=http://user:pass@host:port in env.
+const PROXY_URL = process.env.F1_PROXY_URL ? new URL(process.env.F1_PROXY_URL) : null;
+
+function buildTunnel(targetHost, targetPort) {
+  return new Promise((resolve, reject) => {
+    const proxyPort = parseInt(PROXY_URL.port) || 80;
+    const conn = net.createConnection(proxyPort, PROXY_URL.hostname, () => {
+      const auth = PROXY_URL.username
+        ? `Proxy-Authorization: Basic ${Buffer.from(`${PROXY_URL.username}:${PROXY_URL.password}`).toString('base64')}\r\n`
+        : '';
+      conn.write(`CONNECT ${targetHost}:${targetPort} HTTP/1.1\r\nHost: ${targetHost}:${targetPort}\r\n${auth}\r\n`);
+    });
+    let buf = '';
+    conn.on('data', chunk => {
+      buf += chunk.toString();
+      if (buf.includes('\r\n\r\n')) {
+        if (buf.startsWith('HTTP/1.1 200') || buf.startsWith('HTTP/1.0 200')) {
+          conn.removeAllListeners('data');
+          resolve(conn);
+        } else {
+          reject(new Error(`Proxy CONNECT failed: ${buf.split('\r\n')[0]}`));
+        }
+      }
+    });
+    conn.on('error', reject);
+    conn.setTimeout(10000, () => reject(new Error('Proxy CONNECT timeout')));
+  });
+}
 
 const TOPICS = [
   'Heartbeat',
@@ -43,23 +75,27 @@ let reconnectDelay = 2000;
 let stopped        = false;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function httpsGet(path, extraHeaders = {}) {
+async function httpsGet(path, extraHeaders = {}) {
+  const options = {
+    hostname: BASE_URL,
+    port: 443,
+    path,
+    method: 'GET',
+    headers: { ...BASE_HEADERS, ...extraHeaders },
+  };
+
+  if (PROXY_URL) {
+    const socket = await buildTunnel(BASE_URL, 443);
+    options.socket = socket;
+    options.agent  = false;
+  }
+
   return new Promise((resolve, reject) => {
-    const req = https.request(
-      {
-        hostname: BASE_URL,
-        path,
-        method: 'GET',
-        headers: { ...BASE_HEADERS, ...extraHeaders },
-      },
-      (res) => {
-        let body = '';
-        res.on('data', c => (body += c));
-        res.on('end', () =>
-          resolve({ body, headers: res.headers, statusCode: res.statusCode }),
-        );
-      },
-    );
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', c => (body += c));
+      res.on('end', () => resolve({ body, headers: res.headers, statusCode: res.statusCode }));
+    });
     req.on('error', reject);
     req.end();
   });
@@ -161,7 +197,17 @@ async function connect() {
     ...(cookies ? { Cookie: cookies } : {}),
   };
 
-  ws = new WebSocket(wsUrl, { headers: wsHeaders });
+  let wsOptions = { headers: wsHeaders };
+  if (PROXY_URL) {
+    try {
+      wsOptions.socket = await buildTunnel(BASE_URL, 443);
+    } catch (err) {
+      console.error('[F1] Proxy tunnel failed:', err.message);
+      scheduleReconnect();
+      return;
+    }
+  }
+  ws = new WebSocket(wsUrl, wsOptions);
 
   ws.on('open', async () => {
     console.log('[F1] WebSocket connected');
@@ -204,7 +250,11 @@ function scheduleReconnect() {
   }, reconnectDelay);
 }
 
-function start() { stopped = false; connect(); }
+function start() {
+  if (PROXY_URL) console.log(`[F1] Proxy enabled: ${PROXY_URL.hostname}:${PROXY_URL.port}`);
+  stopped = false;
+  connect();
+}
 
 function stop() {
   stopped = true;
