@@ -6,6 +6,7 @@ const morgan     = require('morgan');
 
 const f1client        = require('./f1timing/client');
 const { backfillResults } = require('./f1timing/backfill');
+const { initTurso, rehydrateFromTurso } = require('./f1timing/persistence');
 const apiRouter       = require('./routes/api');
 const calendarRouter  = require('./routes/calendar');
 const resultsRouter   = require('./routes/results');
@@ -25,8 +26,11 @@ const PORT = process.env.PORT || 3000;
 // ── Start direct F1 live timing WebSocket ─────────────────────────────────────
 f1client.start();
 
-// ── Backfill any missing completed-session results from F1 archive ────────────
-backfillResults().catch(e => console.warn('[BACKFILL] Error:', e.message));
+// ── Turso init + rehydrate before backfill ───────────────────────────────────
+initTurso()
+  .then(() => rehydrateFromTurso())
+  .then(() => backfillResults())
+  .catch(e => console.warn('[STARTUP] Error:', e.message));
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());

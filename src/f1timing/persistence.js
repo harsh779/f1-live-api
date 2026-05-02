@@ -8,6 +8,109 @@ const LAST_STATE_FILE = path.join(DATA_DIR, 'last_state.json');
 // Ensure results directory exists
 if (!fs.existsSync(RESULTS_DIR)) fs.mkdirSync(RESULTS_DIR, { recursive: true });
 
+// ── Turso client (optional — gracefully degraded if env vars absent) ──────────
+let _turso = null;
+function getTurso() {
+  if (_turso) return _turso;
+  const url   = process.env.TURSO_DATABASE_URL;
+  const token = process.env.TURSO_AUTH_TOKEN;
+  if (!url || !token) return null;
+  try {
+    const { createClient } = require('@libsql/client');
+    _turso = createClient({ url, authToken: token });
+    return _turso;
+  } catch (e) {
+    console.warn('[TURSO] Failed to create client:', e.message);
+    return null;
+  }
+}
+
+/** Ensure Turso tables exist. Called once at startup. */
+async function initTurso() {
+  const db = getTurso();
+  if (!db) {
+    console.warn('[TURSO] Skipping init — TURSO_DATABASE_URL / TURSO_AUTH_TOKEN not set');
+    return;
+  }
+  try {
+    await db.executeMultiple(`
+      CREATE TABLE IF NOT EXISTS f1_session_results (
+        filename TEXT PRIMARY KEY,
+        data     TEXT NOT NULL,
+        saved_at INTEGER DEFAULT (unixepoch())
+      );
+      CREATE TABLE IF NOT EXISTS f1_kv_store (
+        key   TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+    `);
+    console.log('[TURSO] Tables ready');
+  } catch (e) {
+    console.error('[TURSO] Init error:', e.message);
+  }
+}
+
+/** Mirror a result file to Turso (fire-and-forget). */
+function _tursoSaveResult(filename, data) {
+  const db = getTurso();
+  if (!db) return;
+  db.execute({
+    sql:  'INSERT OR REPLACE INTO f1_session_results (filename, data) VALUES (?, ?)',
+    args: [filename, JSON.stringify(data)],
+  }).catch(e => console.warn('[TURSO] Failed to mirror result:', e.message));
+}
+
+/** Mirror the kv store entry to Turso (fire-and-forget). */
+function _tursoSaveKV(key, value) {
+  const db = getTurso();
+  if (!db) return;
+  db.execute({
+    sql:  'INSERT OR REPLACE INTO f1_kv_store (key, value) VALUES (?, ?)',
+    args: [key, typeof value === 'string' ? value : JSON.stringify(value)],
+  }).catch(e => console.warn('[TURSO] Failed to mirror kv:', e.message));
+}
+
+/**
+ * On startup: pull any session result files stored in Turso that are missing
+ * from the local filesystem (e.g. after an ephemeral container restart).
+ */
+async function rehydrateFromTurso() {
+  const db = getTurso();
+  if (!db) return;
+  try {
+    // Rehydrate session results
+    const rows = await db.execute('SELECT filename, data FROM f1_session_results');
+    let restored = 0;
+    for (const row of rows.rows) {
+      const filepath = path.join(RESULTS_DIR, row.filename);
+      if (!fs.existsSync(filepath)) {
+        try {
+          fs.writeFileSync(filepath, row.data, 'utf8');
+          restored++;
+        } catch (e) {
+          console.warn(`[TURSO] Failed to write ${row.filename}:`, e.message);
+        }
+      }
+    }
+    if (restored > 0) console.log(`[TURSO] Rehydrated ${restored} session result(s) from Turso`);
+
+    // Rehydrate last_state
+    if (!fs.existsSync(LAST_STATE_FILE)) {
+      const kv = await db.execute({ sql: "SELECT value FROM f1_kv_store WHERE key = 'last_state'", args: [] });
+      if (kv.rows.length > 0) {
+        try {
+          fs.writeFileSync(LAST_STATE_FILE, kv.rows[0].value, 'utf8');
+          console.log('[TURSO] Rehydrated last_state from Turso');
+        } catch {}
+      }
+    }
+  } catch (e) {
+    console.warn('[TURSO] Rehydrate failed:', e.message);
+  }
+}
+
+// ── Core persistence (fs-primary, Turso mirrored) ─────────────────────────────
+
 /**
  * Save a finalised session's results to disk.
  * Filename: YYYY_R{round:02d}_{SessionType}.json
@@ -102,6 +205,10 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
 
     fs.writeFileSync(filepath, JSON.stringify(output, null, 2));
     console.log(`[F1] Session saved → ${filename}`);
+
+    // Mirror to Turso asynchronously
+    _tursoSaveResult(filename, output);
+
     return filename;
   } catch (err) {
     console.error('[F1] Failed to save session result:', err.message);
@@ -136,6 +243,8 @@ function loadResultsByType(type) {
 function saveLastState(snapshot) {
   try {
     fs.writeFileSync(LAST_STATE_FILE, JSON.stringify(snapshot));
+    // Mirror to Turso asynchronously
+    _tursoSaveKV('last_state', JSON.stringify(snapshot));
   } catch {}
 }
 
@@ -147,4 +256,13 @@ function loadLastState() {
   } catch { return null; }
 }
 
-module.exports = { saveSessionResult, listResults, loadResult, loadResultsByType, saveLastState, loadLastState };
+module.exports = {
+  saveSessionResult,
+  listResults,
+  loadResult,
+  loadResultsByType,
+  saveLastState,
+  loadLastState,
+  initTurso,
+  rehydrateFromTurso,
+};
