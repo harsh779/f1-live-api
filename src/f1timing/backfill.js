@@ -60,10 +60,9 @@ function getArchiveMeeting(index, round) {
 function getArchiveSession(meeting, sessionName) {
   const sessions = meeting?.Sessions || [];
   const target = normalizeName(sessionName);
-
-  return sessions.find(s => normalizeName(s.Name) === target || normalizeName(s.Type) === target)
-    || sessions.find(s => normalizeName(s.Name).includes(target) || normalizeName(s.Type).includes(target))
-    || null;
+  // Match by Name only — Type is ambiguous (Sprint has Type="Race", Sprint Qualifying has
+  // Type="Qualifying"), which caused Race/Qualifying to resolve to Sprint/Sprint Qualifying.
+  return sessions.find(s => normalizeName(s.Name) === target) || null;
 }
 
 async function fetchArchiveTopic(sessionPath, topic, { optional = false } = {}) {
