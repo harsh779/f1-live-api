@@ -31,12 +31,24 @@ The API connects to F1's SignalR WebSocket at `livetiming.formula1.com`, subscri
 | Pit strategy | Stint tracking, tyre compounds, pit stop counts, in/out flags |
 | Historical data | Full F1 archive access — every session back to 2018 |
 | Session persistence | Results auto-saved with embedded driver info on session finalisation |
-| Championship standings | Driver and constructor standings calculated from saved results |
-| 2026 calendar | All 24 rounds with session times, track data, lat/lon coordinates |
+| Championship standings | Official Formula1.com rank/points enriched with Race-only wins and podiums |
+| 2026 calendar | Dynamic F1.com calendar with live timing archive round mapping |
 | CSV export | Append `?format=csv` to any endpoint for CSV output |
 | Rate limiting | 100 req/min per IP, 10 SSE connections/min (RateLimit-* headers) |
 | Authentication | Optional API key via `x-api-key` header or `?api_key=` query param |
 | Auto-documentation | `GET /` and `GET /docs` return full machine-readable endpoint reference |
+
+---
+
+## Recent fixes
+
+- Dynamic calendar data now comes from F1.com racing pages and the F1 live timing static index instead of static runtime schedule data.
+- `GET /calendar` serves the dynamic calendar, and `POST /calendar/refresh` can refresh it on demand.
+- Result backfill uses API timing rounds, so display rounds and F1 archive rounds can differ safely.
+- Standings now fetch official rank and points from Formula1.com result tables.
+- Driver wins, driver podiums, and constructor wins are Race-only enrichments, so Sprint results no longer inflate those stats.
+- The Docker deploy now includes committed result archive seed files used by standings enrichment.
+- See [API + App Ecosystem Flow](docs/ECOSYSTEM_FLOW.md) for the full Mermaid data-flow diagram.
 
 ---
 
