@@ -7,6 +7,8 @@ const morgan     = require('morgan');
 const f1client        = require('./f1timing/client');
 const { backfillResults } = require('./f1timing/backfill');
 const { initTurso, rehydrateFromTurso } = require('./f1timing/persistence');
+const state           = require('./f1timing/state');
+const calendarService = require('./data/calendarService');
 const apiRouter       = require('./routes/api');
 const calendarRouter  = require('./routes/calendar');
 const resultsRouter   = require('./routes/results');
@@ -24,13 +26,24 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Start direct F1 live timing WebSocket ─────────────────────────────────────
-f1client.start();
+calendarService.hookSessionInfo(state);
 
 // ── Turso init + rehydrate before backfill ───────────────────────────────────
 initTurso()
+  .then(() => calendarService.init())
   .then(() => rehydrateFromTurso())
   .then(() => backfillResults())
   .catch(e => console.warn('[STARTUP] Error:', e.message));
+
+setInterval(() => {
+  calendarService.refresh().catch(e => console.warn('[CAL] Scheduled refresh failed:', e.message));
+}, 15 * 60 * 1000);
+
+setInterval(() => {
+  backfillResults().catch(e => console.warn('[BACKFILL] Scheduled backfill failed:', e.message));
+}, 10 * 60 * 1000);
+
+f1client.start();
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
@@ -72,6 +85,7 @@ app.get('/', (_req, res) => {
       stream_filtered:   'GET /stream?topic=X      (SSE)',
       stream_timing:     'GET /stream/timing       (SSE)',
       calendar:          'GET /calendar',
+      calendar_refresh:  'POST /calendar/refresh',
       calendar_next:     'GET /calendar/next',
       calendar_current:  'GET /calendar/current',
       calendar_round:    'GET /calendar/:round',
@@ -131,6 +145,7 @@ app.get('/docs', (_req, res) => {
       { method: 'GET', path: '/stream',          description: 'SSE — every raw topic update. Filter: ?topic=TimingData' },
       { method: 'GET', path: '/stream/timing',   description: 'SSE — full leaderboard on each timing change' },
       { method: 'GET', path: '/calendar',        description: 'Full 2026 season calendar' },
+      { method: 'POST', path: '/calendar/refresh', description: 'Refresh the dynamic calendar from F1 native sources' },
       { method: 'GET', path: '/calendar/next',   description: 'Next upcoming session with countdown' },
       { method: 'GET', path: '/calendar/current', description: 'Current race weekend (if active)' },
       { method: 'GET', path: '/calendar/:round', description: 'Specific round details' },

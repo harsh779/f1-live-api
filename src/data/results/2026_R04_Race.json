@@ -1,0 +1,840 @@
+{
+  "meta": {
+    "year": "2026",
+    "round": 4,
+    "meeting": "Miami Grand Prix",
+    "circuit": "Miami",
+    "session_name": "Race",
+    "session_type": "Race",
+    "date": "2026-05-03T13:00:00",
+    "total_laps": 57
+  },
+  "drivers": {
+    "1": {
+      "name": "Lando Norris",
+      "acronym": "NOR",
+      "team": "McLaren",
+      "team_color": "#F47600"
+    },
+    "3": {
+      "name": "Max Verstappen",
+      "acronym": "VER",
+      "team": "Red Bull Racing",
+      "team_color": "#4781D7"
+    },
+    "5": {
+      "name": "Gabriel Bortoleto",
+      "acronym": "BOR",
+      "team": "Audi",
+      "team_color": "#F50537"
+    },
+    "6": {
+      "name": "Isack Hadjar",
+      "acronym": "HAD",
+      "team": "Red Bull Racing",
+      "team_color": "#4781D7"
+    },
+    "10": {
+      "name": "Pierre Gasly",
+      "acronym": "GAS",
+      "team": "Alpine",
+      "team_color": "#00A1E8"
+    },
+    "11": {
+      "name": "Sergio Perez",
+      "acronym": "PER",
+      "team": "Cadillac",
+      "team_color": "#909090"
+    },
+    "12": {
+      "name": "Kimi Antonelli",
+      "acronym": "ANT",
+      "team": "Mercedes",
+      "team_color": "#00D7B6"
+    },
+    "14": {
+      "name": "Fernando Alonso",
+      "acronym": "ALO",
+      "team": "Aston Martin",
+      "team_color": "#229971"
+    },
+    "16": {
+      "name": "Charles Leclerc",
+      "acronym": "LEC",
+      "team": "Ferrari",
+      "team_color": "#ED1131"
+    },
+    "18": {
+      "name": "Lance Stroll",
+      "acronym": "STR",
+      "team": "Aston Martin",
+      "team_color": "#229971"
+    },
+    "23": {
+      "name": "Alexander Albon",
+      "acronym": "ALB",
+      "team": "Williams",
+      "team_color": "#1868DB"
+    },
+    "27": {
+      "name": "Nico Hulkenberg",
+      "acronym": "HUL",
+      "team": "Audi",
+      "team_color": "#F50537"
+    },
+    "30": {
+      "name": "Liam Lawson",
+      "acronym": "LAW",
+      "team": "Racing Bulls",
+      "team_color": "#6C98FF"
+    },
+    "31": {
+      "name": "Esteban Ocon",
+      "acronym": "OCO",
+      "team": "Haas F1 Team",
+      "team_color": "#9C9FA2"
+    },
+    "41": {
+      "name": "Arvid Lindblad",
+      "acronym": "LIN",
+      "team": "Racing Bulls",
+      "team_color": "#6C98FF"
+    },
+    "43": {
+      "name": "Franco Colapinto",
+      "acronym": "COL",
+      "team": "Alpine",
+      "team_color": "#00A1E8"
+    },
+    "44": {
+      "name": "Lewis Hamilton",
+      "acronym": "HAM",
+      "team": "Ferrari",
+      "team_color": "#ED1131"
+    },
+    "55": {
+      "name": "Carlos Sainz",
+      "acronym": "SAI",
+      "team": "Williams",
+      "team_color": "#1868DB"
+    },
+    "63": {
+      "name": "George Russell",
+      "acronym": "RUS",
+      "team": "Mercedes",
+      "team_color": "#00D7B6"
+    },
+    "77": {
+      "name": "Valtteri Bottas",
+      "acronym": "BOT",
+      "team": "Cadillac",
+      "team_color": "#909090"
+    },
+    "81": {
+      "name": "Oscar Piastri",
+      "acronym": "PIA",
+      "team": "McLaren",
+      "team_color": "#F47600"
+    },
+    "87": {
+      "name": "Oliver Bearman",
+      "acronym": "BEA",
+      "team": "Haas F1 Team",
+      "team_color": "#9C9FA2"
+    }
+  },
+  "weather": {
+    "AirTemp": "27.0",
+    "Humidity": "74.0",
+    "Pressure": "1014.9",
+    "Rainfall": "0",
+    "TrackTemp": "36.0",
+    "WindDirection": "144",
+    "WindSpeed": "2.5"
+  },
+  "fastest_lap": null,
+  "results": [
+    {
+      "position": 1,
+      "driver_number": "12",
+      "laps_completed": 57,
+      "gap_to_leader": null,
+      "best_lap_time": "1:31.968",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 26
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 31
+        }
+      ],
+      "speed_traps": {
+        "i1": "214",
+        "i2": "186",
+        "fl": "269",
+        "st": "322"
+      }
+    },
+    {
+      "position": 2,
+      "driver_number": "1",
+      "laps_completed": 57,
+      "gap_to_leader": "+3.264",
+      "best_lap_time": "1:31.869",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 27
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 30
+        }
+      ],
+      "speed_traps": {
+        "i1": "212",
+        "i2": "186",
+        "fl": "282",
+        "st": "315"
+      }
+    },
+    {
+      "position": 3,
+      "driver_number": "81",
+      "laps_completed": 57,
+      "gap_to_leader": "+27.092",
+      "best_lap_time": "1:31.949",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 28
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 29
+        }
+      ],
+      "speed_traps": {
+        "i1": "213",
+        "i2": "186",
+        "fl": "284",
+        "st": "308"
+      }
+    },
+    {
+      "position": 4,
+      "driver_number": "63",
+      "laps_completed": 57,
+      "gap_to_leader": "+43.051",
+      "best_lap_time": "1:32.446",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 20
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 37
+        }
+      ],
+      "speed_traps": {
+        "i1": "214",
+        "i2": "183",
+        "fl": "273",
+        "st": "334"
+      }
+    },
+    {
+      "position": 5,
+      "driver_number": "3",
+      "laps_completed": 57,
+      "gap_to_leader": "+43.949",
+      "best_lap_time": "1:33.110",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 51
+        }
+      ],
+      "speed_traps": {
+        "i1": "211",
+        "i2": "182",
+        "fl": "249",
+        "st": "330"
+      }
+    },
+    {
+      "position": 6,
+      "driver_number": "16",
+      "laps_completed": 57,
+      "gap_to_leader": "+44.245",
+      "best_lap_time": "1:32.515",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 21
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 36
+        }
+      ],
+      "speed_traps": {
+        "i1": "206",
+        "i2": "180",
+        "fl": "214",
+        "st": "277"
+      }
+    },
+    {
+      "position": 7,
+      "driver_number": "44",
+      "laps_completed": 57,
+      "gap_to_leader": "+53.753",
+      "best_lap_time": "1:32.676",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 27
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 30
+        }
+      ],
+      "speed_traps": {
+        "i1": "210",
+        "i2": "182",
+        "fl": "276",
+        "st": "299"
+      }
+    },
+    {
+      "position": 8,
+      "driver_number": "43",
+      "laps_completed": 57,
+      "gap_to_leader": "+61.871",
+      "best_lap_time": "1:33.035",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 31
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 26
+        }
+      ],
+      "speed_traps": {
+        "i1": "212",
+        "i2": "187",
+        "fl": "268",
+        "st": "331"
+      }
+    },
+    {
+      "position": 9,
+      "driver_number": "55",
+      "laps_completed": 57,
+      "gap_to_leader": "+82.072",
+      "best_lap_time": "1:33.026",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 28
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 29
+        }
+      ],
+      "speed_traps": {
+        "i1": "214",
+        "i2": "184",
+        "fl": "279",
+        "st": "316"
+      }
+    },
+    {
+      "position": 10,
+      "driver_number": "23",
+      "laps_completed": 57,
+      "gap_to_leader": "+90.972",
+      "best_lap_time": "1:33.784",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 27
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 30
+        }
+      ],
+      "speed_traps": {
+        "i1": "212",
+        "i2": "183",
+        "fl": "263",
+        "st": "327"
+      }
+    },
+    {
+      "position": 11,
+      "driver_number": "87",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:33.744",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 26
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 30
+        }
+      ],
+      "speed_traps": {
+        "i1": "207",
+        "i2": "182",
+        "fl": "289",
+        "st": "314"
+      }
+    },
+    {
+      "position": 12,
+      "driver_number": "5",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:33.500",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 32
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 24
+        }
+      ],
+      "speed_traps": {
+        "i1": "214",
+        "i2": "185",
+        "fl": "275",
+        "st": "309"
+      }
+    },
+    {
+      "position": 13,
+      "driver_number": "31",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:33.712",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 31
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 25
+        }
+      ],
+      "speed_traps": {
+        "i1": "212",
+        "i2": "186",
+        "fl": "283",
+        "st": "311"
+      }
+    },
+    {
+      "position": 14,
+      "driver_number": "41",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:34.058",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 28
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 28
+        }
+      ],
+      "speed_traps": {
+        "i1": "207",
+        "i2": "181",
+        "fl": "214",
+        "st": "207"
+      }
+    },
+    {
+      "position": 15,
+      "driver_number": "14",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:34.594",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 41
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 15
+        }
+      ],
+      "speed_traps": {
+        "i1": "209",
+        "i2": "185",
+        "fl": "269",
+        "st": "275"
+      }
+    },
+    {
+      "position": 16,
+      "driver_number": "11",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:34.895",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 29
+        },
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 27
+        }
+      ],
+      "speed_traps": {
+        "i1": "207",
+        "i2": "182",
+        "fl": "268",
+        "st": "318"
+      }
+    },
+    {
+      "position": 17,
+      "driver_number": "18",
+      "laps_completed": 56,
+      "gap_to_leader": "1L",
+      "best_lap_time": "1:34.716",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 21
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "false",
+          "laps": 19
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 19
+        }
+      ],
+      "speed_traps": {
+        "i1": "211",
+        "i2": "182",
+        "fl": "266",
+        "st": "324"
+      }
+    },
+    {
+      "position": 18,
+      "driver_number": "77",
+      "laps_completed": 55,
+      "gap_to_leader": "2L",
+      "best_lap_time": "1:36.080",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": false,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 6
+        },
+        {
+          "stint": null,
+          "compound": "SOFT",
+          "new": "true",
+          "laps": 15
+        },
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 9
+        },
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "false",
+          "laps": 34
+        }
+      ],
+      "speed_traps": {
+        "i1": "199",
+        "i2": "179",
+        "fl": "281",
+        "st": "308"
+      }
+    },
+    {
+      "position": 19,
+      "driver_number": "27",
+      "laps_completed": 7,
+      "gap_to_leader": "50L",
+      "best_lap_time": "1:34.523",
+      "best_lap_number": null,
+      "retired": true,
+      "stopped": true,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 1
+        },
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 6
+        }
+      ],
+      "speed_traps": {
+        "i1": "185",
+        "i2": "83",
+        "fl": null,
+        "st": "57"
+      }
+    },
+    {
+      "position": 20,
+      "driver_number": "30",
+      "laps_completed": 6,
+      "gap_to_leader": "51L",
+      "best_lap_time": "1:34.814",
+      "best_lap_number": null,
+      "retired": true,
+      "stopped": true,
+      "in_pit": true,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 6
+        }
+      ],
+      "speed_traps": {
+        "i1": "143",
+        "i2": "100",
+        "fl": null,
+        "st": "102"
+      }
+    },
+    {
+      "position": 21,
+      "driver_number": "10",
+      "laps_completed": 4,
+      "gap_to_leader": "53L",
+      "best_lap_time": "1:34.856",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": true,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "MEDIUM",
+          "new": "true",
+          "laps": 4
+        }
+      ],
+      "speed_traps": {
+        "i1": "206",
+        "i2": "182",
+        "fl": null,
+        "st": "319"
+      }
+    },
+    {
+      "position": 22,
+      "driver_number": "6",
+      "laps_completed": 4,
+      "gap_to_leader": "53L",
+      "best_lap_time": "1:34.833",
+      "best_lap_number": null,
+      "retired": false,
+      "stopped": true,
+      "in_pit": false,
+      "stints": [
+        {
+          "stint": null,
+          "compound": "HARD",
+          "new": "true",
+          "laps": 4
+        }
+      ],
+      "speed_traps": {
+        "i1": "211",
+        "i2": null,
+        "fl": null,
+        "st": null
+      }
+    }
+  ]
+}
