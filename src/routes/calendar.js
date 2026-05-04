@@ -1,18 +1,31 @@
 const { Router } = require('express');
-const { calendar2026 } = require('../data/calendar');
+const calendarService = require('../data/calendarService');
 
 const router = Router();
 
 /** GET /calendar — full 2026 season calendar */
 router.get('/', (req, res) => {
-  res.json(calendar2026);
+  res.json(calendarService.getCalendar());
+});
+
+router.post('/refresh', async (_req, res) => {
+  try {
+    const calendar = await calendarService.refresh();
+    res.json({
+      ok: true,
+      last_refresh: calendarService.getLastRefresh(),
+      calendar,
+    });
+  } catch (e) {
+    res.status(502).json({ ok: false, error: e.message });
+  }
 });
 
 /** GET /calendar/next — next upcoming session */
 router.get('/next', (req, res) => {
   const now = new Date();
 
-  for (const race of calendar2026) {
+  for (const race of calendarService.getCalendar()) {
     const sessions = race.sessions;
     const sessionOrder = race.hasSprint
       ? ['fp1', 'sprint_qualifying', 'sprint', 'qualifying', 'race']
@@ -46,7 +59,7 @@ router.get('/next', (req, res) => {
 router.get('/current', (req, res) => {
   const now = new Date();
 
-  const current = calendar2026.find(race => {
+  const current = calendarService.getCalendar().find(race => {
     const firstSession = new Date(race.sessions.fp1 || race.sessions.sprint_qualifying);
     const lastSession  = new Date(race.sessions.race);
     lastSession.setHours(lastSession.getHours() + 4); // buffer after race ends
@@ -63,7 +76,7 @@ router.get('/current', (req, res) => {
 /** GET /calendar/:round — specific round */
 router.get('/:round', (req, res) => {
   const round = parseInt(req.params.round);
-  const race  = calendar2026.find(r => r.round === round);
+  const race  = calendarService.getCalendar().find(r => r.round === round);
   if (!race) return res.status(404).json({ error: `Round ${round} not found` });
   res.json(race);
 });

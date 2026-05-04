@@ -1,0 +1,529 @@
+{
+  "calendar": [
+    {
+      "round": 1,
+      "slug": "australia",
+      "name": "Australian Grand Prix",
+      "hasSprint": false,
+      "date": "2026-03-08T04:00:00.000Z",
+      "circuit": "Melbourne",
+      "country": "Australia",
+      "city": "Melbourne",
+      "track": {
+        "length_km": 5.278,
+        "laps": 58,
+        "corners": 14,
+        "first_gp": 1996,
+        "lap_record": "1:19.813"
+      },
+      "sessions": {
+        "fp1": "2026-03-06T01:30:00.000Z",
+        "fp2": "2026-03-06T05:00:00.000Z",
+        "fp3": "2026-03-07T01:30:00.000Z",
+        "qualifying": "2026-03-07T05:00:00.000Z",
+        "race": "2026-03-08T04:00:00.000Z"
+      },
+      "apiRound": 1,
+      "timingMeetingKey": 1279
+    },
+    {
+      "round": 2,
+      "slug": "china",
+      "name": "Chinese Grand Prix",
+      "hasSprint": true,
+      "date": "2026-03-15T07:00:00.000Z",
+      "circuit": "Shanghai",
+      "country": "China",
+      "city": "Shanghai",
+      "track": {
+        "length_km": 5.451,
+        "laps": 56,
+        "corners": 16,
+        "first_gp": 2004,
+        "lap_record": "1:32.238"
+      },
+      "sessions": {
+        "fp1": "2026-03-13T03:30:00.000Z",
+        "sprint_qualifying": "2026-03-13T07:30:00.000Z",
+        "sprint": "2026-03-14T03:00:00.000Z",
+        "qualifying": "2026-03-14T07:00:00.000Z",
+        "race": "2026-03-15T07:00:00.000Z"
+      },
+      "apiRound": 2,
+      "timingMeetingKey": 1280
+    },
+    {
+      "round": 3,
+      "slug": "japan",
+      "name": "Japanese Grand Prix",
+      "hasSprint": false,
+      "date": "2026-03-29T05:00:00.000Z",
+      "circuit": "Suzuka",
+      "country": "Japan",
+      "city": "Suzuka",
+      "track": {
+        "length_km": 5.807,
+        "laps": 53,
+        "corners": 18,
+        "first_gp": 1987,
+        "lap_record": "1:30.983"
+      },
+      "sessions": {
+        "fp1": "2026-03-27T02:30:00.000Z",
+        "fp2": "2026-03-27T06:00:00.000Z",
+        "fp3": "2026-03-28T02:30:00.000Z",
+        "qualifying": "2026-03-28T06:00:00.000Z",
+        "race": "2026-03-29T05:00:00.000Z"
+      },
+      "apiRound": 3,
+      "timingMeetingKey": 1281
+    },
+    {
+      "round": 4,
+      "slug": "miami",
+      "name": "Miami Grand Prix",
+      "hasSprint": true,
+      "date": "2026-05-03T17:00:00.000Z",
+      "circuit": "Miami Gardens",
+      "country": "Miami",
+      "city": "Miami Gardens",
+      "track": {
+        "length_km": 5.412,
+        "laps": 57,
+        "corners": 19,
+        "first_gp": 2022,
+        "lap_record": "1:29.708"
+      },
+      "sessions": {
+        "fp1": "2026-05-01T16:00:00.000Z",
+        "sprint_qualifying": "2026-05-01T20:30:00.000Z",
+        "sprint": "2026-05-02T16:00:00.000Z",
+        "qualifying": "2026-05-02T20:00:00.000Z",
+        "race": "2026-05-03T17:00:00.000Z"
+      },
+      "apiRound": 6,
+      "timingMeetingKey": 1284
+    },
+    {
+      "round": 5,
+      "slug": "canada",
+      "name": "Canadian Grand Prix",
+      "hasSprint": true,
+      "date": "2026-05-24T20:00:00.000Z",
+      "circuit": "Montréal",
+      "country": "Canada",
+      "city": "Montréal",
+      "track": {
+        "length_km": 4.361,
+        "laps": 70,
+        "corners": 14,
+        "first_gp": 1978,
+        "lap_record": "1:13.078"
+      },
+      "sessions": {
+        "fp1": "2026-05-22T16:30:00.000Z",
+        "sprint_qualifying": "2026-05-22T20:30:00.000Z",
+        "sprint": "2026-05-23T16:00:00.000Z",
+        "qualifying": "2026-05-23T20:00:00.000Z",
+        "race": "2026-05-24T20:00:00.000Z"
+      }
+    },
+    {
+      "round": 6,
+      "slug": "monaco",
+      "name": "Monaco Grand Prix",
+      "hasSprint": false,
+      "date": "2026-06-07T13:00:00.000Z",
+      "circuit": "Monte Carlo",
+      "country": "Monaco",
+      "city": "Monte Carlo",
+      "track": {
+        "length_km": 3.337,
+        "laps": 78,
+        "corners": 19,
+        "first_gp": 1950,
+        "lap_record": "1:12.909"
+      },
+      "sessions": {
+        "fp1": "2026-06-05T11:30:00.000Z",
+        "fp2": "2026-06-05T15:00:00.000Z",
+        "fp3": "2026-06-06T10:30:00.000Z",
+        "qualifying": "2026-06-06T14:00:00.000Z",
+        "race": "2026-06-07T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 7,
+      "slug": "barcelona-catalunya",
+      "name": "Barcelona Grand Prix",
+      "hasSprint": false,
+      "date": "2026-06-14T13:00:00.000Z",
+      "circuit": "Barcelona",
+      "country": "Barcelona-Catalunya",
+      "city": "Barcelona",
+      "track": null,
+      "sessions": {
+        "fp1": "2026-06-12T11:30:00.000Z",
+        "fp2": "2026-06-12T15:00:00.000Z",
+        "fp3": "2026-06-13T10:30:00.000Z",
+        "qualifying": "2026-06-13T14:00:00.000Z",
+        "race": "2026-06-14T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 8,
+      "slug": "austria",
+      "name": "Austrian Grand Prix",
+      "hasSprint": false,
+      "date": "2026-06-28T13:00:00.000Z",
+      "circuit": "Spielberg",
+      "country": "Austria",
+      "city": "Spielberg",
+      "track": {
+        "length_km": 4.318,
+        "laps": 71,
+        "corners": 10,
+        "first_gp": 1970,
+        "lap_record": "1:05.619"
+      },
+      "sessions": {
+        "fp1": "2026-06-26T11:30:00.000Z",
+        "fp2": "2026-06-26T15:00:00.000Z",
+        "fp3": "2026-06-27T10:30:00.000Z",
+        "qualifying": "2026-06-27T14:00:00.000Z",
+        "race": "2026-06-28T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 9,
+      "slug": "great-britain",
+      "name": "British Grand Prix",
+      "hasSprint": true,
+      "date": "2026-07-05T14:00:00.000Z",
+      "circuit": "Silverstone",
+      "country": "Great Britain",
+      "city": "Silverstone",
+      "track": {
+        "length_km": 5.891,
+        "laps": 52,
+        "corners": 18,
+        "first_gp": 1950,
+        "lap_record": "1:27.097"
+      },
+      "sessions": {
+        "fp1": "2026-07-03T11:30:00.000Z",
+        "sprint_qualifying": "2026-07-03T15:30:00.000Z",
+        "sprint": "2026-07-04T11:00:00.000Z",
+        "qualifying": "2026-07-04T15:00:00.000Z",
+        "race": "2026-07-05T14:00:00.000Z"
+      }
+    },
+    {
+      "round": 10,
+      "slug": "belgium",
+      "name": "Belgian Grand Prix",
+      "hasSprint": false,
+      "date": "2026-07-19T13:00:00.000Z",
+      "circuit": "Spa-Francorchamps",
+      "country": "Belgium",
+      "city": "Spa-Francorchamps",
+      "track": {
+        "length_km": 7.004,
+        "laps": 44,
+        "corners": 19,
+        "first_gp": 1950,
+        "lap_record": "1:46.286"
+      },
+      "sessions": {
+        "fp1": "2026-07-17T11:30:00.000Z",
+        "fp2": "2026-07-17T15:00:00.000Z",
+        "fp3": "2026-07-18T10:30:00.000Z",
+        "qualifying": "2026-07-18T14:00:00.000Z",
+        "race": "2026-07-19T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 11,
+      "slug": "hungary",
+      "name": "Hungarian Grand Prix",
+      "hasSprint": false,
+      "date": "2026-07-26T13:00:00.000Z",
+      "circuit": "Budapest",
+      "country": "Hungary",
+      "city": "Budapest",
+      "track": {
+        "length_km": 4.381,
+        "laps": 70,
+        "corners": 14,
+        "first_gp": 1986,
+        "lap_record": "1:16.627"
+      },
+      "sessions": {
+        "fp1": "2026-07-24T11:30:00.000Z",
+        "fp2": "2026-07-24T15:00:00.000Z",
+        "fp3": "2026-07-25T10:30:00.000Z",
+        "qualifying": "2026-07-25T14:00:00.000Z",
+        "race": "2026-07-26T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 12,
+      "slug": "netherlands",
+      "name": "Dutch Grand Prix",
+      "hasSprint": true,
+      "date": "2026-08-23T13:00:00.000Z",
+      "circuit": "Zandvoort",
+      "country": "Netherlands",
+      "city": "Zandvoort",
+      "track": {
+        "length_km": 4.259,
+        "laps": 72,
+        "corners": 14,
+        "first_gp": 1952,
+        "lap_record": "1:11.097"
+      },
+      "sessions": {
+        "fp1": "2026-08-21T10:30:00.000Z",
+        "sprint_qualifying": "2026-08-21T14:30:00.000Z",
+        "sprint": "2026-08-22T10:00:00.000Z",
+        "qualifying": "2026-08-22T14:00:00.000Z",
+        "race": "2026-08-23T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 13,
+      "slug": "italy",
+      "name": "Italian Grand Prix",
+      "hasSprint": false,
+      "date": "2026-09-06T13:00:00.000Z",
+      "circuit": "Monza",
+      "country": "Italy",
+      "city": "Monza",
+      "track": {
+        "length_km": 5.793,
+        "laps": 53,
+        "corners": 11,
+        "first_gp": 1950,
+        "lap_record": "1:21.046"
+      },
+      "sessions": {
+        "fp1": "2026-09-04T10:30:00.000Z",
+        "fp2": "2026-09-04T14:00:00.000Z",
+        "fp3": "2026-09-05T10:30:00.000Z",
+        "qualifying": "2026-09-05T14:00:00.000Z",
+        "race": "2026-09-06T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 14,
+      "slug": "spain",
+      "name": "Spanish Grand Prix",
+      "hasSprint": false,
+      "date": "2026-09-13T13:00:00.000Z",
+      "circuit": "Madrid",
+      "country": "Spain",
+      "city": "Madrid",
+      "track": {
+        "length_km": 5.474,
+        "laps": 52,
+        "corners": 20,
+        "first_gp": 2026,
+        "lap_record": "N/A"
+      },
+      "sessions": {
+        "fp1": "2026-09-11T11:30:00.000Z",
+        "fp2": "2026-09-11T15:00:00.000Z",
+        "fp3": "2026-09-12T10:30:00.000Z",
+        "qualifying": "2026-09-12T14:00:00.000Z",
+        "race": "2026-09-13T13:00:00.000Z"
+      }
+    },
+    {
+      "round": 15,
+      "slug": "azerbaijan",
+      "name": "Azerbaijan Grand Prix",
+      "hasSprint": false,
+      "date": "2026-09-26T11:00:00.000Z",
+      "circuit": "Baku",
+      "country": "Azerbaijan",
+      "city": "Baku",
+      "track": {
+        "length_km": 6.003,
+        "laps": 51,
+        "corners": 20,
+        "first_gp": 2017,
+        "lap_record": "1:43.009"
+      },
+      "sessions": {
+        "fp1": "2026-09-24T08:30:00.000Z",
+        "fp2": "2026-09-24T12:00:00.000Z",
+        "fp3": "2026-09-25T08:30:00.000Z",
+        "qualifying": "2026-09-25T12:00:00.000Z",
+        "race": "2026-09-26T11:00:00.000Z"
+      }
+    },
+    {
+      "round": 16,
+      "slug": "singapore",
+      "name": "Singapore Grand Prix",
+      "hasSprint": true,
+      "date": "2026-10-11T12:00:00.000Z",
+      "circuit": "Marina Bay",
+      "country": "Singapore",
+      "city": "Marina Bay",
+      "track": {
+        "length_km": 4.94,
+        "laps": 62,
+        "corners": 19,
+        "first_gp": 2008,
+        "lap_record": "1:35.867"
+      },
+      "sessions": {
+        "fp1": "2026-10-09T08:30:00.000Z",
+        "sprint_qualifying": "2026-10-09T12:30:00.000Z",
+        "sprint": "2026-10-10T09:00:00.000Z",
+        "qualifying": "2026-10-10T13:00:00.000Z",
+        "race": "2026-10-11T12:00:00.000Z"
+      }
+    },
+    {
+      "round": 17,
+      "slug": "united-states",
+      "name": "United States Grand Prix",
+      "hasSprint": false,
+      "date": "2026-10-25T20:00:00.000Z",
+      "circuit": "Austin",
+      "country": "United States",
+      "city": "Austin",
+      "track": {
+        "length_km": 5.513,
+        "laps": 56,
+        "corners": 20,
+        "first_gp": 2012,
+        "lap_record": "1:36.169"
+      },
+      "sessions": {
+        "fp1": "2026-10-23T17:30:00.000Z",
+        "fp2": "2026-10-23T21:00:00.000Z",
+        "fp3": "2026-10-24T17:30:00.000Z",
+        "qualifying": "2026-10-24T21:00:00.000Z",
+        "race": "2026-10-25T20:00:00.000Z"
+      }
+    },
+    {
+      "round": 18,
+      "slug": "mexico",
+      "name": "Mexico City Grand Prix",
+      "hasSprint": false,
+      "date": "2026-11-01T20:00:00.000Z",
+      "circuit": "Mexico City",
+      "country": "Mexico",
+      "city": "Mexico City",
+      "track": {
+        "length_km": 4.304,
+        "laps": 71,
+        "corners": 17,
+        "first_gp": 1963,
+        "lap_record": "1:17.774"
+      },
+      "sessions": {
+        "fp1": "2026-10-30T18:30:00.000Z",
+        "fp2": "2026-10-30T22:00:00.000Z",
+        "fp3": "2026-10-31T17:30:00.000Z",
+        "qualifying": "2026-10-31T21:00:00.000Z",
+        "race": "2026-11-01T20:00:00.000Z"
+      }
+    },
+    {
+      "round": 19,
+      "slug": "brazil",
+      "name": "São Paulo Grand Prix",
+      "hasSprint": false,
+      "date": "2026-11-08T17:00:00.000Z",
+      "circuit": "São Paulo",
+      "country": "Brazil",
+      "city": "São Paulo",
+      "track": null,
+      "sessions": {
+        "fp1": "2026-11-06T15:30:00.000Z",
+        "fp2": "2026-11-06T19:00:00.000Z",
+        "fp3": "2026-11-07T14:30:00.000Z",
+        "qualifying": "2026-11-07T18:00:00.000Z",
+        "race": "2026-11-08T17:00:00.000Z"
+      }
+    },
+    {
+      "round": 20,
+      "slug": "las-vegas",
+      "name": "Las Vegas Grand Prix",
+      "hasSprint": false,
+      "date": "2026-11-22T04:00:00.000Z",
+      "circuit": "Las Vegas",
+      "country": "Las Vegas",
+      "city": "Las Vegas",
+      "track": {
+        "length_km": 6.201,
+        "laps": 50,
+        "corners": 17,
+        "first_gp": 2023,
+        "lap_record": "1:35.119"
+      },
+      "sessions": {
+        "fp1": "2026-11-20T00:30:00.000Z",
+        "fp2": "2026-11-20T04:00:00.000Z",
+        "fp3": "2026-11-21T00:30:00.000Z",
+        "qualifying": "2026-11-21T04:00:00.000Z",
+        "race": "2026-11-22T04:00:00.000Z"
+      }
+    },
+    {
+      "round": 21,
+      "slug": "qatar",
+      "name": "Qatar Grand Prix",
+      "hasSprint": false,
+      "date": "2026-11-29T16:00:00.000Z",
+      "circuit": "Lusail",
+      "country": "Qatar",
+      "city": "Lusail",
+      "track": {
+        "length_km": 5.38,
+        "laps": 57,
+        "corners": 16,
+        "first_gp": 2021,
+        "lap_record": "1:24.319"
+      },
+      "sessions": {
+        "fp1": "2026-11-27T13:30:00.000Z",
+        "fp2": "2026-11-27T17:00:00.000Z",
+        "fp3": "2026-11-28T14:30:00.000Z",
+        "qualifying": "2026-11-28T18:00:00.000Z",
+        "race": "2026-11-29T16:00:00.000Z"
+      }
+    },
+    {
+      "round": 22,
+      "slug": "united-arab-emirates",
+      "name": "Abu Dhabi Grand Prix",
+      "hasSprint": false,
+      "date": "2026-12-06T13:00:00.000Z",
+      "circuit": "Yas Marina",
+      "country": "Abu Dhabi",
+      "city": "Yas Marina",
+      "track": {
+        "length_km": 5.281,
+        "laps": 58,
+        "corners": 16,
+        "first_gp": 2009,
+        "lap_record": "1:26.103"
+      },
+      "sessions": {
+        "fp1": "2026-12-04T09:30:00.000Z",
+        "fp2": "2026-12-04T13:00:00.000Z",
+        "fp3": "2026-12-05T10:30:00.000Z",
+        "qualifying": "2026-12-05T14:00:00.000Z",
+        "race": "2026-12-06T13:00:00.000Z"
+      }
+    }
+  ],
+  "last_refresh": "2026-05-04T03:17:47.184Z"
+}

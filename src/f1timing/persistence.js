@@ -70,6 +70,23 @@ function _tursoSaveKV(key, value) {
   }).catch(e => console.warn('[TURSO] Failed to mirror kv:', e.message));
 }
 
+async function saveKV(key, value) {
+  const db = getTurso();
+  if (!db) return false;
+  await db.execute({
+    sql:  'INSERT OR REPLACE INTO f1_kv_store (key, value) VALUES (?, ?)',
+    args: [key, typeof value === 'string' ? value : JSON.stringify(value)],
+  });
+  return true;
+}
+
+async function loadKV(key) {
+  const db = getTurso();
+  if (!db) return null;
+  const rows = await db.execute({ sql: 'SELECT value FROM f1_kv_store WHERE key = ?', args: [key] });
+  return rows.rows[0]?.value || null;
+}
+
 /**
  * On startup: pull any session result files stored in Turso that are missing
  * from the local filesystem (e.g. after an ephemeral container restart).
@@ -263,6 +280,8 @@ module.exports = {
   loadResultsByType,
   saveLastState,
   loadLastState,
+  saveKV,
+  loadKV,
   initTurso,
   rehydrateFromTurso,
 };

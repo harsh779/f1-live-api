@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const { calendar2026 } = require('../data/calendar');
+const calendarService = require('../data/calendarService');
 const { saveSessionResult } = require('./persistence');
 
 const RESULTS_DIR = process.env.DATA_DIR
@@ -75,7 +75,8 @@ async function fetchArchiveTopic(sessionPath, topic, { optional = false } = {}) 
 }
 
 async function backfillArchiveSession(round, archiveIndex, sessionName) {
-  const roundStr = String(round.round).padStart(2, '0');
+  const archiveRound = Number(round.apiRound || round.officialRound || round.round || 0) || round.round;
+  const roundStr = String(archiveRound).padStart(2, '0');
   const filename = `2026_R${roundStr}_${sessionName.replace(/\s+/g, '_')}.json`;
   const filepath = path.join(RESULTS_DIR, filename);
   if (fs.existsSync(filepath)) {
@@ -148,16 +149,14 @@ async function ensureArchiveSession(round, archiveIndex, sessionName, sessionDat
 async function backfillResults() {
   const now = new Date();
   const archiveIndex = await fetchJSON(`${STATIC_BASE}/${ARCHIVE_YEAR}/Index.json`);
+  const calendar = calendarService.getCalendar();
 
-  for (const round of calendar2026) {
-    const raceDate = new Date(round.sessions.race);
-    if (raceDate > now) continue;
-
-    await ensureArchiveSession(round, archiveIndex, 'Qualifying', round.sessions.qualifying);
+  for (const round of calendar) {
+    await ensureArchiveSession(round, archiveIndex, 'Qualifying', round.sessions.qualifying || round.sessions.quali);
     await ensureArchiveSession(round, archiveIndex, 'Race', round.sessions.race);
 
     if (round.hasSprint) {
-      await ensureArchiveSession(round, archiveIndex, 'Sprint Qualifying', round.sessions.sprint_qualifying);
+      await ensureArchiveSession(round, archiveIndex, 'Sprint Qualifying', round.sessions.sprint_qualifying || round.sessions.sprintQuali);
       await ensureArchiveSession(round, archiveIndex, 'Sprint', round.sessions.sprint);
     }
   }
