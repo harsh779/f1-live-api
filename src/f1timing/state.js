@@ -29,8 +29,26 @@ class F1State extends EventEmitter {
     this.topThree          = {};
     this.teamRadio         = { Captures: [] };
     this.heartbeat         = {};
+    this.connectionDiagnostics = {
+      phase: 'idle',
+      attempts: 0,
+      last_error: null,
+      last_error_at: null,
+      last_connected_at: null,
+      last_disconnected_at: null,
+      last_close_code: null,
+      last_close_reason: null,
+    };
     this._lastUpdate       = null;
     this._sessionSaved     = false;
+  }
+
+  markConnectionPhase(phase, details = {}) {
+    this.connectionDiagnostics = {
+      ...this.connectionDiagnostics,
+      phase,
+      ...details,
+    };
   }
 
   /** On startup, restore the last known state so data survives restarts. */

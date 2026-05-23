@@ -174,10 +174,19 @@ async function connect() {
   let negotiation;
   try {
     console.log('[F1] Negotiating...');
+    state.markConnectionPhase('negotiating', {
+      attempts: (state.connectionDiagnostics?.attempts || 0) + 1,
+      last_error: null,
+      last_error_at: null,
+    });
     negotiation = await negotiate();
     console.log(`[F1] Token acquired. ID: ${negotiation.ConnectionId}`);
   } catch (err) {
     console.error('[F1] Negotiate failed:', err.message);
+    state.markConnectionPhase('negotiate_failed', {
+      last_error: err.message,
+      last_error_at: new Date().toISOString(),
+    });
     scheduleReconnect();
     return;
   }
@@ -212,6 +221,11 @@ async function connect() {
   ws.on('open', async () => {
     console.log('[F1] WebSocket connected');
     reconnectDelay = 2000;
+    state.markConnectionPhase('websocket_connected', {
+      last_connected_at: new Date().toISOString(),
+      last_error: null,
+      last_error_at: null,
+    });
 
     await signalStart(token, cookies);
 
@@ -231,12 +245,24 @@ async function connect() {
 
   ws.on('close', (code, reason) => {
     state.connected = false;
-    console.warn(`[F1] Disconnected (${code}): ${reason || 'no reason'}`);
+    const reasonText = reason ? reason.toString() : 'no reason';
+    console.warn(`[F1] Disconnected (${code}): ${reasonText}`);
+    state.markConnectionPhase('websocket_disconnected', {
+      last_disconnected_at: new Date().toISOString(),
+      last_close_code: code,
+      last_close_reason: reasonText,
+    });
     state.emit('disconnected');
     scheduleReconnect();
   });
 
-  ws.on('error', err => console.error('[F1] WS error:', err.message));
+  ws.on('error', err => {
+    console.error('[F1] WS error:', err.message);
+    state.markConnectionPhase('websocket_error', {
+      last_error: err.message,
+      last_error_at: new Date().toISOString(),
+    });
+  });
 }
 
 // ── Reconnect with exponential backoff ───────────────────────────────────────

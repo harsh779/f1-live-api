@@ -134,6 +134,7 @@ router.get('/status', (req, res) => {
     last_update:  state._lastUpdate,
     stale:        Boolean(staleReason),
     stale_reason: staleReason,
+    connection:   state.connectionDiagnostics,
     session:      state.sessionInfo,
     lap_count:    state.lapCount,
     clock:        state.extrapolatedClock,
