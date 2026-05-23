@@ -1,3 +1,33 @@
+# 2026-05-23 Live Timing Stale State Fix
+
+## Scope
+- Stop the Live tab from rendering persisted Miami Race timing as current live data during the Canadian GP weekend.
+- Keep archived `/results` data intact.
+
+## Constraints
+- Do not hardcode a Canadian GP timing payload.
+- Preserve graceful fallback when the upstream feed is disconnected.
+
+## Unknowns
+- Whether the deployed SignalR connection will reconnect on its own after deploy.
+
+## Decisions
+- Treat disconnected finalised persisted state older than a short freshness window as stale for live endpoints.
+- Keep stale metadata in `/status`, but suppress live `/timing` driver rows.
+
+## Implementation Sequence
+- Add stale-finalised-session detection to API live timing routes.
+- Add a defensive stale guard in the app `/api/live-widget` proxy.
+- Validate syntax and mocked stale response behavior.
+
+## Validation Sequence
+- Run `node --check` on touched JS files.
+- Verify a stale finalised Miami payload no longer produces live driver rows.
+- Re-check production endpoints to confirm the root cause is still the stale upstream state until deployment.
+
+## Risks
+- Recently finished sessions should remain visible briefly; the freshness window avoids hiding immediate post-session data.
+
 # Standings Fetch Plan
 
 ## Scope

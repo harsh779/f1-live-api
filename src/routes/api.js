@@ -2,9 +2,31 @@ const { Router } = require('express');
 const state = require('../f1timing/state');
 
 const router = Router();
+const STALE_FINALISED_MS = 2 * 60 * 60 * 1000;
+
+function getSessionAgeMs() {
+  if (!state._lastUpdate) return Infinity;
+  const updatedAt = new Date(state._lastUpdate).getTime();
+  return Number.isFinite(updatedAt) ? Date.now() - updatedAt : Infinity;
+}
+
+function isStaleFinalisedSession() {
+  const status = state.sessionInfo?.SessionStatus;
+  return !state.connected
+    && (status === 'Finalised' || status === 'Ends')
+    && getSessionAgeMs() > STALE_FINALISED_MS;
+}
+
+function getStaleReason() {
+  if (!isStaleFinalisedSession()) return null;
+  const name = state.sessionInfo?.Meeting?.Name || state.sessionInfo?.Name || 'previous session';
+  return `Disconnected timing feed is holding stale finalised data from ${name}`;
+}
 
 // ── Per-driver timing view builder ────────────────────────────────────────────
 function buildTimingView() {
+  if (isStaleFinalisedSession()) return [];
+
   const drivers  = state.driverList       || {};
   const timing   = state.timingData?.Lines   || {};
   const appData  = state.timingAppData?.Lines || {};
@@ -106,9 +128,12 @@ function buildTimingView() {
 
 /** GET /status — connection state, session info, clock, flags */
 router.get('/status', (req, res) => {
+  const staleReason = getStaleReason();
   res.json({
     connected:    state.connected,
     last_update:  state._lastUpdate,
+    stale:        Boolean(staleReason),
+    stale_reason: staleReason,
     session:      state.sessionInfo,
     lap_count:    state.lapCount,
     clock:        state.extrapolatedClock,
@@ -119,9 +144,12 @@ router.get('/status', (req, res) => {
 
 /** GET /timing — full leaderboard, all 22 drivers */
 router.get('/timing', (req, res) => {
+  const staleReason = getStaleReason();
   res.json({
     timestamp: new Date().toISOString(),
     session:   state.sessionInfo?.Name || null,
+    stale:     Boolean(staleReason),
+    stale_reason: staleReason,
     drivers:   buildTimingView(),
   });
 });
