@@ -4,6 +4,33 @@ All notable updates to the F1 Insights API.
 
 ---
 
+## v3.5 — 2026-06-07
+
+- Migrated live timing from classic SignalR (`/signalr`) to SignalR Core (`/signalrcore`) — F1 retired the classic endpoint (hard `401` with `WWW-Authenticate` challenge from origin, regardless of user-agent, cookies, or proxy IP); Core is now the only working source, and the only one that ever delivered `TeamRadio` (see #1)
+- Forward `AWSALB`/`AWSALBCORS` sticky-session cookies from negotiate onto the WebSocket upgrade — without this the hub returns `404 "No Connection with that ID"` because the connection lands on a different backend instance than the one that issued the token
+- Handle SignalR Core's Subscribe-completion message (`type:3`) — carries the one-time initial snapshot for `DriverList`/`SessionInfo`/`TrackStatus`/`ExtrapolatedClock` (Core's equivalent of classic SignalR's `R` field). These topics are sent once and rarely re-broadcast — without this handler they stayed null/stale indefinitely while every other topic streamed live
+- Extended `F1_PROXY_URL` tunnel coverage to the negotiate request (previously only wrapped the WebSocket connect — would have failed negotiate when a proxy is required)
+- Fixed team radio `audio_url` — was built without the session folder prefix and 403'd on F1's CDN; now correctly resolves via `sessionInfo.Path` to the real playable file
+- Expanded subscribed topics 16 → 18: added `TeamRadio`, `AudioStreams`, `ContentStreams`
+- Connection diagnostics (`markConnectionPhase`/`connectionDiagnostics`, added in v3.3) carried over to the new protocol intact, plus a new `handshake_failed` phase for Core's handshake step
+
+## v3.4 — 2026-06-07
+
+- Fixed duplicate archive round backfill
+- Persisted archived timing detail
+
+## v3.3 — 2026-05-23
+
+- Exposed live timing connection diagnostics via `/status` (`connection.phase`, attempt count, last error, last connect/disconnect timestamps and close codes)
+- Suppressed stale finalised live timing — persisted state from a prior session no longer presented as current
+
+## v3.2 — 2026-05-04
+
+- Added optional HTTP CONNECT proxy support (`F1_PROXY_URL`) — routes the F1 SignalR connection through a residential IP to bypass CloudFront WAF datacenter-IP blocks
+- Persisted session results to a database to survive ephemeral container restarts
+- Fixed archive session-type matching (Race↔Sprint, Qualifying↔Sprint Qualifying confusion)
+- Corrected 2026 session start times (timezone conversion from f1calendar.com)
+
 ## v3.1 — 2026-03-12
 
 - Embedded driver info (name, acronym, team, team colour) into saved session results for accurate past session display
