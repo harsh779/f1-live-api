@@ -45,6 +45,35 @@ function normalizeName(value) {
     .replace(/[^a-z0-9]+/g, '');
 }
 
+function filenamePart(value) {
+  return String(value || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function resultMatchesSession(result, round, sessionName) {
+  return normalizeName(result?.meta?.meeting) === normalizeName(round.name)
+    && normalizeName(result?.meta?.session_name) === normalizeName(sessionName);
+}
+
+function resolveBackfillFilename(round, archiveRound, sessionName) {
+  const roundStr = String(archiveRound).padStart(2, '0');
+  const sessionPart = filenamePart(sessionName);
+  const canonical = `${ARCHIVE_YEAR}_R${roundStr}_${sessionPart}.json`;
+  const canonicalPath = path.join(RESULTS_DIR, canonical);
+  if (!fs.existsSync(canonicalPath)) return canonical;
+
+  try {
+    const existing = JSON.parse(fs.readFileSync(canonicalPath, 'utf8'));
+    if (resultMatchesSession(existing, round, sessionName)) return canonical;
+  } catch {
+    return canonical;
+  }
+
+  return `${ARCHIVE_YEAR}_R${roundStr}_${filenamePart(round.name)}_${sessionPart}.json`;
+}
+
 function getArchiveMeeting(index, round) {
   const meetings = index?.Meetings || [];
   const exactName = normalizeName(round.name);
@@ -77,12 +106,12 @@ async function fetchArchiveTopic(sessionPath, topic, { optional = false } = {}) 
 async function backfillArchiveSession(round, archiveIndex, sessionName) {
   const archiveRound = Number(round.apiRound || round.officialRound || round.round || 0) || round.round;
   const roundStr = String(archiveRound).padStart(2, '0');
-  const filename = `2026_R${roundStr}_${sessionName.replace(/\s+/g, '_')}.json`;
+  const filename = resolveBackfillFilename(round, archiveRound, sessionName);
   const filepath = path.join(RESULTS_DIR, filename);
   if (fs.existsSync(filepath)) {
     try {
       const existing = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-      if (existing?.meta?.source !== 'ergast-backfill') return;
+      if (resultMatchesSession(existing, round, sessionName) && existing?.meta?.source !== 'ergast-backfill') return;
       console.log(`[BACKFILL] Replacing legacy ${filename} with F1 archive data`);
     } catch {
       // If the existing file is unreadable, attempt to rebuild it from archive.
@@ -128,6 +157,7 @@ async function backfillArchiveSession(round, archiveIndex, sessionName) {
       weatherData,
       lapCount,
       driverList,
+      { filename },
     );
 
     if (saved) console.log(`[BACKFILL] Saved ${saved} from archive`);

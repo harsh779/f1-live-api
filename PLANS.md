@@ -63,3 +63,31 @@
 ## Risks
 - HTML parsing is more brittle than a formal JSON API.
 - Race archive metadata inconsistencies can affect race-only stat enrichment.
+
+# Duplicate Archive Round Result Recovery
+
+## Scope
+- Backfill Monaco qualifying from Formula 1's static timing archive.
+- Preserve the existing Miami qualifying result that shares archive round number 6.
+
+## Constraints
+- Use only Formula 1 live/static timing sources.
+- Preserve existing result filenames when no collision exists.
+- Keep result route and saved-result payload contracts compatible.
+
+## Decision
+- When the canonical `year + archive round + session` filename belongs to another meeting, save the new result with the meeting name included in the filename.
+
+## Implementation Sequence
+1. Detect whether an existing canonical result belongs to the requested meeting and session.
+2. Generate a meeting-qualified filename only when a collision exists.
+3. Allow archive backfill to pass the validated filename to persistence.
+
+## Validation Sequence
+1. Run backfill against Formula 1's current 2026 static index.
+2. Verify both Miami and Monaco qualifying files remain present.
+3. Verify Monaco qualifying contains a full classification and is listed by `/results`.
+4. Run syntax and API endpoint checks.
+
+## Risks
+- Future schedule changes may create more duplicate archive round numbers; the meeting-qualified fallback handles the same pattern.

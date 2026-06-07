@@ -133,12 +133,15 @@ async function rehydrateFromTurso() {
  * Filename: YYYY_R{round:02d}_{SessionType}.json
  * e.g. 2026_R01_Race.json, 2026_R01_Qualifying.json
  */
-function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherData, lapCount, driverList) {
+function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherData, lapCount, driverList, options = {}) {
   try {
     const year    = sessionInfo.StartDate?.slice(0, 4) || new Date().getFullYear();
     const round   = String(sessionInfo.Meeting?.Number || 0).padStart(2, '0');
     const type    = (sessionInfo.Name || 'Session').replace(/\s+/g, '_');
-    const filename = `${year}_R${round}_${type}.json`;
+    const defaultFilename = `${year}_R${round}_${type}.json`;
+    const filename = /^\d{4}_R\d{2}_\w+\.json$/.test(options.filename || '')
+      ? options.filename
+      : defaultFilename;
     const filepath  = path.join(RESULTS_DIR, filename);
 
     const lines = timingData?.Lines || {};
