@@ -145,6 +145,19 @@ function handleFrames(raw) {
           processFeedMessage(msg.arguments[0], msg.arguments[1]);
         }
         break;
+      case 3: // Completion — reply to our Subscribe call; carries the initial
+              // full-state snapshot for EVERY topic (DriverList, SessionInfo,
+              // TrackStatus, ExtrapolatedClock, etc). These are static/rarely
+              // re-broadcast, so without this the snapshot they only ever come
+              // here, not via type:1 deltas. Equivalent to classic SignalR's "R".
+        if (msg.invocationId === '0' && msg.result && typeof msg.result === 'object') {
+          Object.entries(msg.result).forEach(([topic, data]) => {
+            if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+              processFeedMessage(topic, data);
+            }
+          });
+        }
+        break;
       case 6: // Ping — reply with pong
         sendFrame({ type: 6 });
         break;
