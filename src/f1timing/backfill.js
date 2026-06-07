@@ -57,6 +57,16 @@ function resultMatchesSession(result, round, sessionName) {
     && normalizeName(result?.meta?.session_name) === normalizeName(sessionName);
 }
 
+function hasArchivedTimingDetail(result) {
+  return Array.isArray(result?.results)
+    && result.results.length > 0
+    && result.results.every(driver =>
+      Object.prototype.hasOwnProperty.call(driver, 'interval')
+      && Array.isArray(driver.sectors)
+      && driver.sectors.length === 3
+    );
+}
+
 function resolveBackfillFilename(round, archiveRound, sessionName) {
   const roundStr = String(archiveRound).padStart(2, '0');
   const sessionPart = filenamePart(sessionName);
@@ -111,7 +121,11 @@ async function backfillArchiveSession(round, archiveIndex, sessionName) {
   if (fs.existsSync(filepath)) {
     try {
       const existing = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-      if (resultMatchesSession(existing, round, sessionName) && existing?.meta?.source !== 'ergast-backfill') return;
+      if (
+        resultMatchesSession(existing, round, sessionName)
+        && existing?.meta?.source !== 'ergast-backfill'
+        && hasArchivedTimingDetail(existing)
+      ) return;
       console.log(`[BACKFILL] Replacing legacy ${filename} with F1 archive data`);
     } catch {
       // If the existing file is unreadable, attempt to rebuild it from archive.

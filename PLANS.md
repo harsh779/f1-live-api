@@ -91,3 +91,24 @@
 
 ## Risks
 - Future schedule changes may create more duplicate archive round numbers; the meeting-qualified fallback handles the same pattern.
+
+# Archived Qualifying Timing Detail
+
+## Scope
+- Persist Formula 1 archive best lap, interval, sector, and speed data in saved session results.
+- Refresh saved archive results created before these fields were supported.
+
+## Constraints
+- Use only Formula 1 live/static timing sources.
+- Preserve the existing saved-result response shape while adding fields.
+- Do not fabricate values when Formula 1 does not provide them.
+
+## Implementation Sequence
+1. Map archive qualifying stats to best lap and final-session interval values.
+2. Persist best sectors and best speed traps with live timing values as fallback.
+3. Rebuild matching archive result files when their timing-detail schema is incomplete.
+
+## Validation Sequence
+1. Rebuild Monaco qualifying from Formula 1's static archive.
+2. Verify all classified drivers have best sectors and best speed where supplied.
+3. Verify Gabriel Bortoleto has Formula 1's archived best lap, interval, sectors, and speed.

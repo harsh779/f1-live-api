@@ -156,17 +156,40 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
         const stat = statLines[num] || {};
         const stints    = app.Stints || [];
         const stintsArr = Array.isArray(stints) ? stints : Object.values(stints);
+        const sessionStats = Array.isArray(td.Stats) ? td.Stats : Object.values(td.Stats || {});
+        const finalSessionStats = [...sessionStats].reverse().find(s =>
+          s?.TimeDifftoPositionAhead || s?.TimeDiffToFastest
+        ) || {};
+        const personalBestLap = stat.PersonalBestLapTime || stat.PersonalFastestLap || {};
+        const position = parseInt(td.Position) || null;
 
         return {
-          position:      parseInt(td.Position) || null,
+          position,
           driver_number: num,
           laps_completed: td.NumberOfLaps || null,
-          gap_to_leader: td.GapToLeader  || null,
-          best_lap_time: stat.PersonalFastestLap?.Value || td.BestLapTime?.Value || null,
-          best_lap_number: stat.PersonalFastestLap?.Lap || null,
+          gap_to_leader: position === 1 ? null : (td.GapToLeader || finalSessionStats.TimeDiffToFastest || null),
+          interval: position === 1 ? null : (td.IntervalToPositionAhead?.Value || finalSessionStats.TimeDifftoPositionAhead || null),
+          best_lap_time: personalBestLap.Value || td.BestLapTime?.Value || null,
+          best_lap_number: personalBestLap.Lap || td.BestLapTime?.Lap || null,
           retired:       td.Retired  || false,
           stopped:       td.Stopped  || false,
           in_pit:        td.InPit    || false,
+          sectors: [0, 1, 2].map(i => {
+            const sector = td.Sectors?.[i] || {};
+            const bestSector = stat.BestSectors?.[i] || {};
+            const segments = sector.Segments || {};
+            const segmentList = Array.isArray(segments) ? segments : Object.values(segments);
+            return {
+              value: bestSector.Value || sector.Value || sector.PreviousValue || null,
+              personal_best: Boolean(sector.PersonalFastest),
+              overall_best: bestSector.Position === 1 || Boolean(sector.OverallFastest),
+              stopped: Boolean(sector.Stopped),
+              segments: segmentList.map((segment, index) => ({
+                index,
+                status: segment?.Status ?? 0,
+              })),
+            };
+          }),
           stints: stintsArr.map(s => ({
             stint:    s.TyreLife || null,
             compound: s.Compound || null,
@@ -174,10 +197,10 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
             laps:     s.TotalLaps || null,
           })),
           speed_traps: {
-            i1: td.Speeds?.I1?.Value || null,
-            i2: td.Speeds?.I2?.Value || null,
-            fl: td.Speeds?.FL?.Value || null,
-            st: td.Speeds?.ST?.Value || null,
+            i1: stat.BestSpeeds?.I1?.Value || td.Speeds?.I1?.Value || null,
+            i2: stat.BestSpeeds?.I2?.Value || td.Speeds?.I2?.Value || null,
+            fl: stat.BestSpeeds?.FL?.Value || td.Speeds?.FL?.Value || null,
+            st: stat.BestSpeeds?.ST?.Value || td.Speeds?.ST?.Value || null,
           },
         };
       })
@@ -188,8 +211,9 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
     Object.entries(statLines)
       .filter(([num]) => /^\d+$/.test(num))
       .forEach(([num, stat]) => {
-        if (stat.PersonalFastestLap?.OverallFastest) {
-          fastestLap = { driver_number: num, time: stat.PersonalFastestLap.Value, lap: stat.PersonalFastestLap.Lap };
+        const personalBestLap = stat.PersonalBestLapTime || stat.PersonalFastestLap;
+        if (personalBestLap?.Position === 1 || personalBestLap?.OverallFastest) {
+          fastestLap = { driver_number: num, time: personalBestLap.Value, lap: personalBestLap.Lap };
         }
       });
 
