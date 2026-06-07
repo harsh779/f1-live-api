@@ -19,7 +19,10 @@ function buildRadioMessages() {
       acronym:       d.Tla       || null,
       team:          d.TeamName  || null,
       timestamp:     cap.Utc     || null,
-      audio_url:     cap.Path ? `${AUDIO_BASE}${cap.Path}` : null,
+      // cap.Path is relative to the session's static folder (e.g. "TeamRadio/BEA_87_..mp3"),
+      // NOT the static root — must prefix with sessionInfo.Path
+      // ("2026/2026-06-07_Monaco_Grand_Prix/2026-06-07_Race/") or the file 403s.
+      audio_url:     cap.Path ? `${AUDIO_BASE}${state.sessionInfo?.Path || ''}${cap.Path}` : null,
     };
   }).sort((a, b) => {
     if (!a.timestamp || !b.timestamp) return 0;
