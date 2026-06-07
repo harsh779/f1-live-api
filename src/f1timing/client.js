@@ -73,6 +73,11 @@ function buildTunnel(targetHost, targetPort) {
   });
 }
 
+function parseCookies(rawHeaders) {
+  const setCookies = rawHeaders['set-cookie'] || [];
+  return setCookies.map(c => c.split(';')[0]).join('; ');
+}
+
 // ── Negotiate (SignalR Core) ──────────────────────────────────────────────────
 function negotiate() {
   return new Promise((resolve, reject) => {
@@ -94,7 +99,11 @@ function negotiate() {
       res.on('data', c => (data += c));
       res.on('end', () => {
         if (res.statusCode !== 200) return reject(new Error(`Negotiate HTTP ${res.statusCode}: ${data}`));
-        try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
+        try {
+          const parsed  = JSON.parse(data);
+          const cookies = parseCookies(res.headers);
+          resolve({ ...parsed, _cookies: cookies });
+        } catch (e) { reject(e); }
       });
     });
     req.on('error', reject);
@@ -155,12 +164,17 @@ async function connect() {
     return;
   }
 
-  const token = negotiation.connectionToken || negotiation.connectionId;
-  const wsUrl = `wss://${BASE_URL}${HUB_PATH}?id=${encodeURIComponent(token)}`;
+  const token   = negotiation.connectionToken || negotiation.connectionId;
+  const cookies = negotiation._cookies;
+  const wsUrl   = `wss://${BASE_URL}${HUB_PATH}?id=${encodeURIComponent(token)}`;
 
+  // Forward AWSALB/AWSALBCORS sticky-session cookies from negotiate so the
+  // WebSocket upgrade lands on the SAME backend instance that issued the
+  // connection ID. Without this the hub returns 404 "No Connection with that ID".
   const wsHeaders = {
     'User-Agent': 'BestHTTP',
     'Origin':     'https://www.formula1.com',
+    ...(cookies ? { Cookie: cookies } : {}),
   };
 
   let wsOptions = { headers: wsHeaders };
