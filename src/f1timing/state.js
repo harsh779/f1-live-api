@@ -2,20 +2,11 @@ const { EventEmitter } = require('events');
 const { deepMerge }    = require('./merge');
 const persistence      = require('./persistence');
 
-// Topics whose arrival means the live session is actually producing timing.
-// Heartbeat / ExtrapolatedClock are deliberately excluded: F1 keeps sending
-// them on an idle, connected socket long after a session ends, so they can't
-// be used to judge whether timing is genuinely live.
-const TIMING_TOPICS = new Set([
-  'TimingData', 'TimingAppData', 'TimingStats',
-  'Position', 'CarData', 'TopThree', 'LapCount',
-]);
-
 class F1State extends EventEmitter {
   constructor() {
     super();
     this.setMaxListeners(200);
-    this._sessionSaved = false; // prevent double-saving same session
+    this._savedStatus = null; // how far the current session has been archived
     this.reset();
     this._loadPersistedState();
   }
@@ -40,34 +31,44 @@ class F1State extends EventEmitter {
       last_close_reason: null,
     };
     this._lastUpdate       = null;
-    this._sessionSaved     = false;
+    this._savedStatus      = null;
 
-    // All per-session timing state.
+    // Ambient single-value topics. Preserved across a session change (see
+    // _resetSessionScopedState); cleared here only on a full reset.
+    this.weatherData       = {};
+    this.trackStatus       = {};
+    this.extrapolatedClock = {};
+
+    // All per-session, per-driver state.
     this._resetSessionScopedState();
   }
 
   /**
-   * Clear everything tied to a single session. Invoked on a real session
-   * change (a new SessionInfo.Key) so a fresh session never inherits the
-   * previous one's leaderboard, gaps, sectors, stints or race-control log via
-   * F1's differential (changed-fields-only) updates. Driver identity,
-   * connection state and sessionInfo are intentionally preserved here.
+   * Clear the per-driver leaderboard and per-session logs. Invoked on a real
+   * session change (a new SessionInfo.Key) so a fresh session never inherits
+   * the previous one's positions, gaps, sectors, stints, lap count or
+   * race-control / team-radio log via F1's differential (changed-fields-only)
+   * updates.
+   *
+   * Deliberately NOT cleared here: driverList and sessionInfo (identity), and
+   * the ambient single-value topics trackStatus / extrapolatedClock /
+   * weatherData. F1 delivers those three in the one-time subscribe snapshot and
+   * rarely re-broadcasts them (CHANGELOG v3.5), so clearing them without a
+   * re-subscribe would leave the track flag and session clock null for the
+   * whole new session. A brief carry-over until F1 next sends them is harmless
+   * (they are not per-driver) and self-corrects.
    */
   _resetSessionScopedState() {
-    this.sessionData       = {};
-    this.timingData        = {};
-    this.timingAppData     = {};
-    this.timingStats       = {};
-    this.carData           = {};
-    this.position          = {};
-    this.weatherData       = {};
-    this.trackStatus       = {};
-    this.raceControl       = { Messages: [] };
-    this.lapCount          = {};
-    this.extrapolatedClock = {};
-    this.topThree          = {};
-    this.teamRadio         = { Captures: [] };
-    this._lastTimingUpdate = null;
+    this.sessionData   = {};
+    this.timingData    = {};
+    this.timingAppData = {};
+    this.timingStats   = {};
+    this.carData       = {};
+    this.position      = {};
+    this.lapCount      = {};
+    this.topThree      = {};
+    this.raceControl   = { Messages: [] };
+    this.teamRadio     = { Captures: [] };
   }
 
   markConnectionPhase(phase, details = {}) {
@@ -102,7 +103,6 @@ class F1State extends EventEmitter {
   applyUpdate(topic, data) {
     const ts = new Date().toISOString();
     this._lastUpdate = ts;
-    if (TIMING_TOPICS.has(topic)) this._lastTimingUpdate = ts;
 
     switch (topic) {
       case 'SessionInfo': {
@@ -116,13 +116,26 @@ class F1State extends EventEmitter {
         const currentKey  = this.sessionInfo?.Key;
         if (incomingKey != null && currentKey != null && incomingKey !== currentKey) {
           this._resetSessionScopedState();
-          this._sessionSaved = false;
+          this._savedStatus = null;
         }
         this.sessionInfo = deepMerge(this.sessionInfo, data);
-        // Auto-save when session is finalised
-        if (this.sessionInfo.SessionStatus === 'Finalised' && !this._sessionSaved) {
-          this._sessionSaved = true;
-          setImmediate(() => this._saveSession());
+
+        // Archive the session as it ends. Save on 'Finished' (provisional, so a
+        // result exists the instant the session ends — before the live board
+        // stops being served) and again on 'Finalised'/'Ends' (steward-confirmed)
+        // to overwrite. The data is captured synchronously NOW: a later session
+        // change resets these fields, so a deferred save reading this.* directly
+        // would persist an empty classification.
+        const status  = this.sessionInfo.SessionStatus;
+        const isFinal = status === 'Finalised' || status === 'Ends';
+        if (isFinal && this._savedStatus !== 'final') {
+          this._savedStatus = 'final';
+          const snap = this._captureSessionSnapshot();
+          setImmediate(() => this._saveSession(snap));
+        } else if (status === 'Finished' && this._savedStatus == null) {
+          this._savedStatus = 'provisional';
+          const snap = this._captureSessionSnapshot();
+          setImmediate(() => this._saveSession(snap));
         }
         break;
       }
@@ -175,18 +188,38 @@ class F1State extends EventEmitter {
     this.emit(`topic:${topic}`, { data, timestamp: ts });
   }
 
-  _saveSession() {
+  /**
+   * Snapshot the references needed to persist a session result. Capturing them
+   * synchronously (instead of reading this.* inside a deferred save) means a
+   * session change that resets the live state cannot blank the archived result:
+   * applyUpdate / _resetSessionScopedState reassign these fields to new objects
+   * (deepMerge never mutates in place), leaving the captured ones intact.
+   */
+  _captureSessionSnapshot() {
+    return {
+      sessionInfo:   this.sessionInfo,
+      timingData:    this.timingData,
+      timingAppData: this.timingAppData,
+      timingStats:   this.timingStats,
+      weatherData:   this.weatherData,
+      lapCount:      this.lapCount,
+      driverList:    this.driverList,
+    };
+  }
+
+  _saveSession(snap) {
+    const s = snap || this._captureSessionSnapshot();
     const filename = persistence.saveSessionResult(
-      this.sessionInfo,
-      this.timingData,
-      this.timingAppData,
-      this.timingStats,
-      this.weatherData,
-      this.lapCount,
-      this.driverList,
+      s.sessionInfo,
+      s.timingData,
+      s.timingAppData,
+      s.timingStats,
+      s.weatherData,
+      s.lapCount,
+      s.driverList,
     );
     if (filename) {
-      this.emit('session:saved', { filename, session: this.sessionInfo });
+      this.emit('session:saved', { filename, session: s.sessionInfo });
     }
   }
 

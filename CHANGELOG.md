@@ -4,6 +4,14 @@ All notable updates to the F1 Insights API.
 
 ---
 
+## v3.6.1 — 2026-06-13
+
+Hardening of the v3.6 live-session rewrite (found in code review):
+
+- **Live board no longer blanks during long stoppages.** Feed-liveness now keys off *any* socket activity (`_lastUpdate`, which Heartbeat keeps fresh) instead of timing-only updates. Timing pauses for minutes under a red flag or between qualifying segments while the session is still live; the old 10-min timing-only window would drop the leaderboard and fall back to the previous session mid-race. The window (now 5 min) only triggers when the socket is genuinely silent. Removed the `_lastTimingUpdate` / `TIMING_TOPICS` machinery.
+- **Finished-session archive can no longer be saved empty.** The save now captures the session's state references synchronously and fires on `Finished` (provisional) as well as `Finalised`/`Ends` (final, overwrites). Previously the save was deferred via `setImmediate` and read live state, so a session rollover processed in the same event-loop tick could reset the timing before the save ran, persisting a zero-driver classification.
+- **Ambient topics survive a session change.** `trackStatus`, `extrapolatedClock` and `weatherData` are no longer cleared on a `SessionInfo.Key` change. F1 sends these in the one-time subscribe snapshot and rarely re-broadcasts them (see v3.5), so clearing without a re-subscribe left the track flag and session clock null for the whole new session. Only per-driver leaderboard and per-session logs reset now.
+
 ## v3.6 — 2026-06-13
 
 - Fixed live leaderboard showing wrong data **during** a session while the finished result stayed correct. Two root causes:
