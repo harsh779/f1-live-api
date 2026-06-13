@@ -2,30 +2,48 @@ const { Router } = require('express');
 const state = require('../f1timing/state');
 
 const router = Router();
-const STALE_FINALISED_MS = 2 * 60 * 60 * 1000;
 
-function getSessionAgeMs() {
-  if (!state._lastUpdate) return Infinity;
-  const updatedAt = new Date(state._lastUpdate).getTime();
+// A session counts as "live" only while it is actively running AND its timing
+// feed is fresh. Neither condition alone is sufficient:
+//   • SessionStatus alone fails because the socket stays connected (and the
+//     status stays "Finalised"/"Started") long after data stops flowing.
+//   • Connection alone fails for the same reason — `connected` is true on an
+//     idle socket between sessions.
+// So we require an active phase AND a recent *timing* update (see TIMING_TOPICS
+// in state.js; Heartbeat/clock don't qualify).
+const LIVE_SESSION_STATUSES = new Set(['Started', 'Aborted', 'Finished']);
+const LIVE_FEED_TIMEOUT_MS  = 10 * 60 * 1000;
+
+function getTimingAgeMs() {
+  if (!state._lastTimingUpdate) return Infinity;
+  const updatedAt = new Date(state._lastTimingUpdate).getTime();
   return Number.isFinite(updatedAt) ? Date.now() - updatedAt : Infinity;
 }
 
-function isStaleFinalisedSession() {
+function isLiveTimingActive() {
   const status = state.sessionInfo?.SessionStatus;
-  return !state.connected
-    && (status === 'Finalised' || status === 'Ends')
-    && getSessionAgeMs() > STALE_FINALISED_MS;
+  if (!status || !LIVE_SESSION_STATUSES.has(status)) return false;
+  return getTimingAgeMs() <= LIVE_FEED_TIMEOUT_MS;
 }
 
 function getStaleReason() {
-  if (!isStaleFinalisedSession()) return null;
-  const name = state.sessionInfo?.Meeting?.Name || state.sessionInfo?.Name || 'previous session';
-  return `Disconnected timing feed is holding stale finalised data from ${name}`;
+  if (isLiveTimingActive()) return null;
+  const status = state.sessionInfo?.SessionStatus;
+  const name   = state.sessionInfo?.Meeting?.Name || state.sessionInfo?.Name || null;
+  if (!status) return 'No active session';
+  if (status === 'Finalised' || status === 'Ends' || status === 'Finished') {
+    return name ? `${name} has finished` : 'Session has finished';
+  }
+  if (status === 'Inactive') {
+    return name ? `${name} has not started yet` : 'Session has not started yet';
+  }
+  // Active status but no recent timing — the feed has dropped or frozen.
+  return name ? `Live timing feed for ${name} is stale` : 'Live timing feed is stale';
 }
 
 // ── Per-driver timing view builder ────────────────────────────────────────────
 function buildTimingView() {
-  if (isStaleFinalisedSession()) return [];
+  if (!isLiveTimingActive()) return [];
 
   const drivers  = state.driverList       || {};
   const timing   = state.timingData?.Lines   || {};
@@ -131,7 +149,9 @@ router.get('/status', (req, res) => {
   const staleReason = getStaleReason();
   res.json({
     connected:    state.connected,
+    live:         isLiveTimingActive(),
     last_update:  state._lastUpdate,
+    last_timing_update: state._lastTimingUpdate || null,
     stale:        Boolean(staleReason),
     stale_reason: staleReason,
     connection:   state.connectionDiagnostics,
@@ -149,6 +169,7 @@ router.get('/timing', (req, res) => {
   res.json({
     timestamp: new Date().toISOString(),
     session:   state.sessionInfo?.Name || null,
+    live:      isLiveTimingActive(),
     stale:     Boolean(staleReason),
     stale_reason: staleReason,
     drivers:   buildTimingView(),

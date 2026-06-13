@@ -2,6 +2,15 @@ const { EventEmitter } = require('events');
 const { deepMerge }    = require('./merge');
 const persistence      = require('./persistence');
 
+// Topics whose arrival means the live session is actually producing timing.
+// Heartbeat / ExtrapolatedClock are deliberately excluded: F1 keeps sending
+// them on an idle, connected socket long after a session ends, so they can't
+// be used to judge whether timing is genuinely live.
+const TIMING_TOPICS = new Set([
+  'TimingData', 'TimingAppData', 'TimingStats',
+  'Position', 'CarData', 'TopThree', 'LapCount',
+]);
+
 class F1State extends EventEmitter {
   constructor() {
     super();
@@ -12,22 +21,13 @@ class F1State extends EventEmitter {
   }
 
   reset() {
+    // Connection + driver identity: persist across sessions within a connection.
+    // driverList in particular is NOT re-sent by F1 between sessions of the same
+    // weekend unless the socket re-subscribes, so it must not be cleared on a
+    // session change — only on a full reset.
     this.connected         = false;
     this.sessionInfo       = {};
-    this.sessionData       = {};
     this.driverList        = {};
-    this.timingData        = {};
-    this.timingAppData     = {};
-    this.timingStats       = {};
-    this.carData           = {};
-    this.position          = {};
-    this.weatherData       = {};
-    this.trackStatus       = {};
-    this.raceControl       = { Messages: [] };
-    this.lapCount          = {};
-    this.extrapolatedClock = {};
-    this.topThree          = {};
-    this.teamRadio         = { Captures: [] };
     this.heartbeat         = {};
     this.connectionDiagnostics = {
       phase: 'idle',
@@ -41,6 +41,33 @@ class F1State extends EventEmitter {
     };
     this._lastUpdate       = null;
     this._sessionSaved     = false;
+
+    // All per-session timing state.
+    this._resetSessionScopedState();
+  }
+
+  /**
+   * Clear everything tied to a single session. Invoked on a real session
+   * change (a new SessionInfo.Key) so a fresh session never inherits the
+   * previous one's leaderboard, gaps, sectors, stints or race-control log via
+   * F1's differential (changed-fields-only) updates. Driver identity,
+   * connection state and sessionInfo are intentionally preserved here.
+   */
+  _resetSessionScopedState() {
+    this.sessionData       = {};
+    this.timingData        = {};
+    this.timingAppData     = {};
+    this.timingStats       = {};
+    this.carData           = {};
+    this.position          = {};
+    this.weatherData       = {};
+    this.trackStatus       = {};
+    this.raceControl       = { Messages: [] };
+    this.lapCount          = {};
+    this.extrapolatedClock = {};
+    this.topThree          = {};
+    this.teamRadio         = { Captures: [] };
+    this._lastTimingUpdate = null;
   }
 
   markConnectionPhase(phase, details = {}) {
@@ -75,11 +102,20 @@ class F1State extends EventEmitter {
   applyUpdate(topic, data) {
     const ts = new Date().toISOString();
     this._lastUpdate = ts;
+    if (TIMING_TOPICS.has(topic)) this._lastTimingUpdate = ts;
 
     switch (topic) {
-      case 'SessionInfo':
-        // Detect when session changes — reset saved flag
-        if (data.Key && data.Key !== this.sessionInfo.Key) {
+      case 'SessionInfo': {
+        // A changed SessionInfo.Key means F1 rolled to a different session
+        // (e.g. Practice 2 → Practice 3, or Qualifying → Race). Drop the prior
+        // session's timing BEFORE merging the new info, otherwise its stale
+        // leaderboard bleeds into the new session until every field happens to
+        // be overwritten by a delta — which is the root cause of "live data is
+        // all wrong, but the finished result is correct".
+        const incomingKey = data?.Key;
+        const currentKey  = this.sessionInfo?.Key;
+        if (incomingKey != null && currentKey != null && incomingKey !== currentKey) {
+          this._resetSessionScopedState();
           this._sessionSaved = false;
         }
         this.sessionInfo = deepMerge(this.sessionInfo, data);
@@ -89,6 +125,7 @@ class F1State extends EventEmitter {
           setImmediate(() => this._saveSession());
         }
         break;
+      }
       case 'SessionData':       this.sessionData       = deepMerge(this.sessionData, data); break;
       case 'DriverList':        this.driverList        = deepMerge(this.driverList, data); break;
       case 'TimingData':        this.timingData        = deepMerge(this.timingData, data); break;

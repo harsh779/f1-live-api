@@ -4,6 +4,12 @@ All notable updates to the F1 Insights API.
 
 ---
 
+## v3.6 — 2026-06-13
+
+- Fixed live leaderboard showing wrong data **during** a session while the finished result stayed correct. Two root causes:
+  - **No state reset between sessions.** F1 sends changed-fields-only differential updates, but state was only ever reset in the constructor — a new session (`SessionInfo.Key` change) deep-merged its deltas on top of the *previous* session's leaderboard, so positions/gaps/sectors/best-laps/stints bled across until each field was eventually overwritten. The board was a mix of old + new mid-session and only became correct once the session finalised. Now a `SessionInfo.Key` change clears all per-session timing via `_resetSessionScopedState()` before merging; driver identity (`DriverList`) is preserved because F1 does not re-send it intra-weekend without a fresh subscribe.
+  - **Liveness judged by socket connection.** `isStaleFinalisedSession()` required `connected === false`, but the socket stays connected (and keeps sending `Heartbeat`) long after a session ends — so a finalised/idle session was served as "live". Replaced with `isLiveTimingActive()`: an active `SessionStatus` (`Started`/`Aborted`/`Finished`) **and** a recent *timing* update (tracked via `_lastTimingUpdate`; Heartbeat/clock excluded, 10-minute feed timeout). `/status` and `/timing` now expose `live` and `last_timing_update`.
+
 ## v3.5 — 2026-06-07
 
 - Migrated live timing from classic SignalR (`/signalr`) to SignalR Core (`/signalrcore`) — F1 retired the classic endpoint (hard `401` with `WWW-Authenticate` challenge from origin, regardless of user-agent, cookies, or proxy IP); Core is now the only working source, and the only one that ever delivered `TeamRadio` (see #1)
