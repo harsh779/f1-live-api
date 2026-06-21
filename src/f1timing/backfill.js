@@ -171,7 +171,7 @@ async function backfillArchiveSession(round, archiveIndex, sessionName) {
       weatherData,
       lapCount,
       driverList,
-      { filename },
+      { filename, archive_path: session.Path },
     );
 
     if (saved) console.log(`[BACKFILL] Saved ${saved} from archive`);

@@ -240,6 +240,7 @@ function saveSessionResult(sessionInfo, timingData, appData, statsData, weatherD
         session_type: (sessionInfo.Name || '').includes('Sprint') ? 'Sprint ' + (sessionInfo.Type || '') : (sessionInfo.Type || null),
         date: sessionInfo.StartDate || null,
         total_laps: lapCount?.TotalLaps || null,
+        archive_path: options.archive_path || null,
       },
       drivers,
       weather: weatherData || {},

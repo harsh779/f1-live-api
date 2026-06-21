@@ -1,5 +1,7 @@
 const { Router } = require('express');
 const state = require('../f1timing/state');
+const { getArchiveTelemetry, getSessionCarData } = require('../f1timing/telemArchive');
+const { loadResult } = require('../f1timing/persistence');
 
 const router = Router();
 
@@ -236,6 +238,88 @@ router.get('/stream/:number', (req, res) => {
 
   state.on('update', onUpdate);
   req.on('close', () => state.off('update', onUpdate));
+});
+
+// ── Archive telemetry (post-session, from F1 static archive) ─────────────────
+
+/**
+ * GET /telemetry/archive/:filename
+ * Returns driver list + session meta for a saved result file.
+ * Requires meta.archive_path (set by backfill since this feature landed).
+ */
+router.get('/archive/:filename', async (req, res) => {
+  const result = loadResult(req.params.filename);
+  if (!result) return res.status(404).json({ error: 'Result not found' });
+
+  const archivePath = result.meta?.archive_path;
+  if (!archivePath) {
+    return res.status(404).json({
+      error: 'No archive_path in result meta — file was saved before telemetry support was added',
+    });
+  }
+
+  res.json({
+    session:      result.meta,
+    archive_path: archivePath,
+    drivers: Object.entries(result.drivers || {}).map(([num, d]) => {
+      const r = (result.results || []).find(x => x.driver_number === num);
+      return {
+        number:     num,
+        name:       d.name       || null,
+        acronym:    d.acronym    || null,
+        team:       d.team       || null,
+        team_color: d.team_color || null,
+        best_lap:   r?.best_lap_time || null,
+        position:   r?.position      || null,
+      };
+    }).sort((a, b) => (a.position || 99) - (b.position || 99)),
+  });
+});
+
+/**
+ * GET /telemetry/archive/:filename/:driver
+ * Full session telemetry for one driver — fetched + parsed from F1 static archive.
+ * Cached in memory for 24 h after first request.
+ * Response: {session, driver, fastest_lap, sample_count, samples: [{t,d,v,thr,brk,rpm,g,drs}]}
+ *   t   = UTC epoch ms
+ *   d   = cumulative distance (same units as F1 Position X/Y — meters)
+ *   v   = speed km/h
+ *   thr = throttle 0–100
+ *   brk = brake 0/1
+ *   rpm = engine RPM
+ *   g   = gear (0=neutral)
+ *   drs = DRS status code (0=off, 8=eligible, 10=on, 12=active)
+ */
+router.get('/archive/:filename/:driver', async (req, res) => {
+  const result = loadResult(req.params.filename);
+  if (!result) return res.status(404).json({ error: 'Result not found' });
+
+  const archivePath = result.meta?.archive_path;
+  if (!archivePath) {
+    return res.status(404).json({
+      error: 'No archive_path in result meta — file was saved before telemetry support was added',
+    });
+  }
+
+  const driverNum = req.params.driver;
+  const driverInfo = result.drivers?.[driverNum] || {};
+  const driverResult = (result.results || []).find(r => r.driver_number === driverNum);
+
+  try {
+    const samples = await getArchiveTelemetry(archivePath, driverNum);
+    res.json({
+      session:      result.meta,
+      driver:       { number: driverNum, ...driverInfo },
+      fastest_lap:  driverResult
+        ? { time: driverResult.best_lap_time, lap: driverResult.best_lap_number }
+        : null,
+      sample_count: samples.length,
+      samples,
+    });
+  } catch (e) {
+    console.error(`[TELEM] Archive fetch failed for ${req.params.filename}/${driverNum}:`, e.message);
+    res.status(503).json({ error: `Archive fetch failed: ${e.message}` });
+  }
 });
 
 module.exports = router;
